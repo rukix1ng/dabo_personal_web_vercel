@@ -57,21 +57,21 @@ export const content = {
             id: 1,
             title: "NIMS and Lam Research Announce Strategic Partnership",
             date: "2026-02-15",
-            image: "/news-1.jpg",
+            image: "",
             description: "Major collaboration to advance semiconductor equipment materials research"
           },
           {
             id: 2,
             title: "Breakthrough in High-Performance Materials Development",
             date: "2026-02-10",
-            image: "/news-2.jpg",
+            image: "",
             description: "New electron source materials show promising results in initial testing"
           },
           {
             id: 3,
             title: "International Research Exchange Program Launched",
             date: "2026-02-05",
-            image: "/news-3.jpg",
+            image: "",
             description: "Inviting materials researchers across Japan to collaborate at NIMS"
           }
         ],
@@ -275,21 +275,21 @@ export const content = {
             id: 1,
             title: "NIMS与泛林集团宣布战略合作伙伴关系",
             date: "2026-02-15",
-            image: "/news-1.jpg",
+            image: "",
             description: "推进半导体装备材料研究的重大合作"
           },
           {
             id: 2,
             title: "高性能材料开发取得突破",
             date: "2026-02-10",
-            image: "/news-2.jpg",
+            image: "",
             description: "新型电子源材料在初步测试中显示出良好前景"
           },
           {
             id: 3,
             title: "国际研究交流项目启动",
             date: "2026-02-05",
-            image: "/news-3.jpg",
+            image: "",
             description: "邀请日本各地材料研究人员在NIMS开展合作"
           }
         ],
@@ -493,21 +493,21 @@ export const content = {
             id: 1,
             title: "NIMSとラムリサーチが戦略的パートナーシップを発表",
             date: "2026-02-15",
-            image: "/news-1.jpg",
+            image: "",
             description: "半導体装置材料研究を推進する重要な協力関係"
           },
           {
             id: 2,
             title: "高性能材料開発でブレークスルー",
             date: "2026-02-10",
-            image: "/news-2.jpg",
+            image: "",
             description: "新しい電子源材料が初期テストで有望な結果を示す"
           },
           {
             id: 3,
             title: "国際研究交流プログラムを開始",
             date: "2026-02-05",
-            image: "/news-3.jpg",
+            image: "",
             description: "日本全国の材料研究者をNIMSでの共同研究に招待"
           }
         ],

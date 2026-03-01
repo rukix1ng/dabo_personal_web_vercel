@@ -30,13 +30,19 @@ export function ProjectNews({ featured, list }: ProjectNewsProps) {
       <div className="grid gap-8 md:grid-cols-2">
         {/* Image Display */}
         <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-muted shadow-lg ring-1 ring-border">
-          <Image
-            src={selectedNews.image}
-            alt={selectedNews.title}
-            fill
-            className="object-cover transition-all duration-300"
-            sizes="(max-width: 768px) 100vw, 50vw"
-          />
+          {selectedNews.image ? (
+            <Image
+              src={selectedNews.image}
+              alt={selectedNews.title}
+              fill
+              className="object-cover transition-all duration-300"
+              sizes="(max-width: 768px) 100vw, 50vw"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-muted">
+              <span className="text-sm text-muted-foreground">暂无图片</span>
+            </div>
+          )}
         </div>
 
         {/* Featured News List */}
