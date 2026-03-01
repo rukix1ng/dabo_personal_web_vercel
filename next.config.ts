@@ -11,6 +11,25 @@ const nextConfig: NextConfig = {
     // Reduce number of device sizes to generate fewer variants
     deviceSizes: [640, 750, 1080, 1200, 1920],
     imageSizes: [16, 32, 48, 64, 96],
+    // Allow images from Qiniu cloud storage
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'tb7l8osfp.hd-bkt.clouddn.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'tb7l8osfp.hd-bkt.clouddn.com',
+        pathname: '/**',
+      },
+      // Temporary: allow old S3 domain for existing images
+      {
+        protocol: 'https',
+        hostname: 'dabowebsite.s3.cn-east-1.qiniucs.com',
+        pathname: '/**',
+      },
+    ],
   },
   // Enable compression for better performance
   compress: true,

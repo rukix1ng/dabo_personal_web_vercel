@@ -1,248 +1,233 @@
 import { content, type Locale, locales } from "@/lib/i18n";
-import { BilibiliPlayer } from "@/components/bilibili-player";
-import { Calendar, User, Users, ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { Calendar, User, Building2, ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { query } from "@/lib/db";
+import { BilibiliPlayer } from "@/components/bilibili-player";
 
 type PageProps = {
-    params: Promise<{ locale: Locale; id: string }>;
+  params: Promise<{ locale: Locale; id: string }>;
 };
 
-// 使用动态渲染而不是静态生成，因为论坛数据是 mock 的
-// 这样可以大大减少构建时间（从 18 个静态页面减少到动态渲染）
 export const dynamic = 'force-dynamic';
-export const dynamicParams = true;
 
-// 不再使用 generateStaticParams，改为动态渲染
-// 如果需要静态生成，可以取消下面的注释
-// export async function generateStaticParams() {
-//     const forumIds = ["forum-1", "forum-2", "forum-3", "forum-4", "forum-5", "forum-6"];
-//     const params: Array<{ locale: Locale; id: string }> = [];
-//     
-//     for (const locale of locales) {
-//         for (const id of forumIds) {
-//             params.push({ locale, id });
-//         }
-//     }
-//     
-//     return params;
-// }
+interface Invitation {
+  id: number;
+  title_en: string;
+  subtitle_en: string | null;
+  speaker_en: string;
+  speaker_institution_en: string | null;
+  abstract_en: string | null;
+  title_zh: string;
+  subtitle_zh: string | null;
+  speaker_zh: string;
+  speaker_institution_zh: string | null;
+  abstract_zh: string | null;
+  title_ja: string;
+  subtitle_ja: string | null;
+  speaker_ja: string;
+  speaker_institution_ja: string | null;
+  speaker_institution_link: string | null;
+  abstract_ja: string | null;
+  event_time: string | null;
+  image: string | null;
+  video_link: string | null;
+}
+
+async function getInvitation(id: string): Promise<Invitation | null> {
+  try {
+    const invitations = await query<any>(
+      'SELECT * FROM invitation WHERE id = ?',
+      [parseInt(id)]
+    );
+
+    if (invitations.length === 0) {
+      return null;
+    }
+
+    return invitations[0];
+  } catch (error) {
+    console.error('Error fetching invitation:', error);
+    return null;
+  }
+}
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-    const { locale: localeParam, id } = await params;
-    const locale = localeParam in content ? localeParam : "en";
-    const t = content[locale];
+  const { locale: localeParam, id } = await params;
+  const locale = localeParam in content ? localeParam : "en";
+  const t = content[locale];
 
-    // Find the forum by ID
-    const forum = mockForums.find((f) => f.id === id);
-
-    if (!forum) {
-        return {
-            title: `${t.forum.title} | ${t.meta.title}`,
-        };
-    }
-
+  const invitation = await getInvitation(id);
+  if (!invitation) {
     return {
-        title: `${forum.title} | ${t.forum.title} | ${t.meta.title}`,
-        description: forum.description,
-        keywords: [...t.meta.keywords, "forum", "academic forum", "research forum", forum.title],
-        alternates: {
-            canonical: `/${locale}/forum/${id}`,
-            languages: {
-                en: `/en/forum/${id}`,
-                zh: `/zh/forum/${id}`,
-                ja: `/ja/forum/${id}`,
-            },
-        },
-        openGraph: {
-            title: `${forum.title} | ${t.forum.title}`,
-            description: forum.description,
-            type: "video.other",
-            locale: locale === "en" ? "en_US" : locale === "zh" ? "zh_CN" : "ja_JP",
-            url: `/${locale}/forum/${id}`,
-        },
-        twitter: {
-            card: "summary_large_image",
-            title: `${forum.title} | ${t.forum.title}`,
-            description: forum.description,
-        },
+      title: `${t.forum.title} | ${t.meta.title}`,
     };
+  }
+
+  const title = locale === "zh" ? invitation.title_zh : locale === "ja" ? invitation.title_ja : invitation.title_en;
+  const abstract = locale === "zh" ? invitation.abstract_zh : locale === "ja" ? invitation.abstract_ja : invitation.abstract_en;
+
+  return {
+    title: `${title} | ${t.forum.title} | ${t.meta.title}`,
+    description: abstract || title,
+    openGraph: {
+      title: `${title} | ${t.forum.title}`,
+      description: abstract || title,
+      type: "article",
+      locale: locale === "en" ? "en_US" : locale === "zh" ? "zh_CN" : "ja_JP",
+      images: invitation.image ? [invitation.image] : undefined,
+    },
+  };
 }
 
-interface Forum {
-    id: string;
-    title: string;
-    image: string;
-    date: string;
-    host: string;
-    speaker: string;
-    description: string;
-    bilibiliId: string;
-}
+export default async function InvitationDetailPage({ params }: PageProps) {
+  const { locale: localeParam, id } = await params;
+  const locale = localeParam in content ? localeParam : "en";
+  const t = content[locale];
 
-// Mock forum data (same as in list page)
-const mockForums: Forum[] = [
-    {
-        id: "forum-1",
-        title: "Advanced Materials Characterization Techniques in Modern Research",
-        image: "/media-report-1.png",
-        date: "2024年3月15日 14:00-16:00",
-        host: "Dr. Bo Da",
-        speaker: "Prof. John Smith, Dr. Alice Wang",
-        description: "本次论坛将深入探讨现代材料研究中的先进表征技术，包括电子显微镜、X射线衍射、光谱分析等前沿方法。我们将分享最新的研究成果和技术进展，讨论如何将这些技术应用于纳米材料、半导体器件和量子材料的研究中。",
-        bilibiliId: "BV1xx411c7mD",
-    },
-    {
-        id: "forum-2",
-        title: "Quantum Materials and Their Applications in Next-Generation Devices",
-        image: "/media-report-2a.png",
-        date: "2024年2月20日 10:00-12:00",
-        host: "Prof. Chen Wei",
-        speaker: "Dr. Bo Da, Dr. Sarah Johnson",
-        description: "量子材料在下一代电子器件中的应用前景广阔。本次论坛将重点讨论量子材料的基本特性、制备方法以及在量子计算、量子通信和高性能传感器中的应用。专家们将分享他们在这一领域的最新研究成果和未来发展方向。",
-        bilibiliId: "BV1yy4y1e7VN",
-    },
-    {
-        id: "forum-3",
-        title: "Surface Analysis Methods for Nanomaterial Research",
-        image: "/media-report-3.png",
-        date: "2024年1月10日 15:00-17:00",
-        host: "Dr. Liu Ming",
-        speaker: "Dr. Bo Da",
-        description: "表面分析技术是纳米材料研究的关键工具。本论坛将介绍各种表面分析方法，包括XPS、AES、SIMS等，以及如何利用这些技术来研究纳米材料的表面结构、化学组成和电子性质。我们还将讨论虚拟基底方法等创新技术在纳米材料表征中的应用。",
-        bilibiliId: "BV1xx411c7mD",
-    },
-    {
-        id: "forum-4",
-        title: "Semiconductor Device Physics and Manufacturing",
-        image: "/media-report-1.png",
-        date: "2023年12月5日 13:00-15:00",
-        host: "Prof. Wang Lei",
-        speaker: "Dr. Michael Brown, Dr. Emily Chen",
-        description: "半导体器件是现代电子技术的基础。本次论坛将探讨半导体器件的物理原理、制造工艺和性能优化。专家们将分享在宽禁带半导体、功率器件和光电器件方面的最新研究进展，以及如何应对制造过程中的挑战。",
-        bilibiliId: "BV1yy4y1e7VN",
-    },
-    {
-        id: "forum-5",
-        title: "Electron Microscopy in Materials Science: From Basics to Advanced Applications",
-        image: "/media-report-2b.png",
-        date: "2023年11月18日 09:00-11:00",
-        host: "Dr. Zhang Hua",
-        speaker: "Prof. David Park, Dr. Bo Da",
-        description: "电子显微镜技术在材料科学研究中发挥着不可替代的作用。本论坛将从基础知识讲起，介绍扫描电子显微镜（SEM）和透射电子显微镜（TEM）的工作原理，然后深入探讨高分辨率成像、电子能量损失谱（EELS）和能量色散X射线谱（EDX）等高级应用技术。",
-        bilibiliId: "BV1xx411c7mD",
-    },
-    {
-        id: "forum-6",
-        title: "Nanophotonics and Optical Properties of Low-Dimensional Materials",
-        image: "/media-report-2c.png",
-        date: "2023年10月22日 14:30-16:30",
-        host: "Prof. Li Jian",
-        speaker: "Dr. Anna Martinez, Dr. Robert Kim",
-        description: "纳米光子学是研究光与纳米结构相互作用的前沿领域。本次论坛将讨论低维材料（如二维材料、量子点、纳米线）的光学性质，以及它们在光电器件、传感器和量子信息技术中的应用。我们将探讨如何利用这些材料的独特光学特性来开发新型光子器件。",
-        bilibiliId: "BV1yy4y1e7VN",
-    },
-];
+  const invitation = await getInvitation(id);
 
-export default async function ForumDetailPage({ params }: PageProps) {
-    const { locale: localeParam, id } = await params;
-    const locale = localeParam in content ? localeParam : "en";
-    const t = content[locale];
+  if (!invitation) {
+    notFound();
+  }
 
-    // Find the forum by ID
-    const forum = mockForums.find((f) => f.id === id);
+  const title = locale === "zh" ? invitation.title_zh : locale === "ja" ? invitation.title_ja : invitation.title_en;
+  const subtitle = locale === "zh" ? invitation.subtitle_zh : locale === "ja" ? invitation.subtitle_ja : invitation.subtitle_en;
+  const speaker = locale === "zh" ? invitation.speaker_zh : locale === "ja" ? invitation.speaker_ja : invitation.speaker_en;
+  const institution = locale === "zh" ? invitation.speaker_institution_zh : locale === "ja" ? invitation.speaker_institution_ja : invitation.speaker_institution_en;
+  const abstract = locale === "zh" ? invitation.abstract_zh : locale === "ja" ? invitation.abstract_ja : invitation.abstract_en;
 
-    // If forum not found, show 404
-    if (!forum) {
-        notFound();
+  const backText = locale === "zh" ? "返回列表" : locale === "ja" ? "リストに戻る" : "Back to List";
+  const abstractTitle = locale === "zh" ? "报告摘要" : locale === "ja" ? "講演概要" : "Abstract";
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    if (locale === "zh") {
+      return date.toLocaleString("zh-CN", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } else if (locale === "ja") {
+      return date.toLocaleString("ja-JP", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } else {
+      return date.toLocaleString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
     }
+  };
 
-    // Generate JSON-LD structured data
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://yourdomain.com';
-    const jsonLd = {
-        "@context": "https://schema.org",
-        "@type": "Event",
-        name: forum.title,
-        description: forum.description,
-        startDate: forum.date,
-        organizer: {
-            "@type": "Person",
-            name: forum.host,
-        },
-        performer: forum.speaker.split(", ").map((speaker) => ({
-            "@type": "Person",
-            name: speaker.trim(),
-        })),
-        url: `${baseUrl}/${locale}/forum/${forum.id}`,
-        video: {
-            "@type": "VideoObject",
-            name: forum.title,
-            description: forum.description,
-            thumbnailUrl: `${baseUrl}${forum.image}`,
-        },
-    };
+  return (
+    <main className="mx-auto flex min-h-screen w-full max-w-4xl flex-col gap-8 px-4 py-10 sm:px-6 lg:px-8">
+      {/* Back Button */}
+      <Link
+        href={`/${locale}/forum`}
+        className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        {backText}
+      </Link>
 
-    return (
-        <>
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-            />
-            <main className="mx-auto flex min-h-screen w-full max-w-4xl flex-col gap-8 px-4 py-10 sm:px-6 lg:px-8">
-            {/* Back to list link */}
-            <Link
-                href={`/${locale}/forum`}
-                className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors w-fit"
-            >
-                <ArrowLeft className="w-4 h-4" />
-                {t.forum.backToList}
-            </Link>
+      {/* Title and Meta Information */}
+      <div className="flex flex-col gap-4">
+        {/* Title Section */}
+        <div className="flex flex-col gap-3">
+          <h1 className="text-3xl font-bold text-foreground sm:text-4xl">
+            {title}
+          </h1>
+          {subtitle && (
+            <p className="text-lg text-muted-foreground">{subtitle}</p>
+          )}
+        </div>
 
-            {/* Forum Title */}
-            <div className="flex flex-col gap-4">
-                <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
-                    {forum.title}
-                </h1>
+        {/* Meta Information */}
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-3 border-l-2 border-primary pl-4">
+          {/* Speaker */}
+          <div className="flex items-center gap-3">
+            <User className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+            <span className="text-foreground">
+              <span className="font-medium">
+                {locale === "zh" ? "主讲人：" : locale === "ja" ? "講演者：" : "Speaker: "}
+              </span>
+              {speaker}
+            </span>
+          </div>
 
-                {/* Forum Meta Information */}
-                <div className="flex flex-col gap-2 text-sm text-muted-foreground border-l-2 border-primary pl-4">
-                    <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 flex-shrink-0" />
-                        <span>
-                            <span className="font-medium">{t.forum.date}:</span> {forum.date}
-                        </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <User className="w-4 h-4 flex-shrink-0" />
-                        <span>
-                            <span className="font-medium">{t.forum.host}:</span> {forum.host}
-                        </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Users className="w-4 h-4 flex-shrink-0" />
-                        <span>
-                            <span className="font-medium">{t.forum.speaker}:</span> {forum.speaker}
-                        </span>
-                    </div>
-                </div>
+          {/* Institution */}
+          {institution && (
+            <div className="flex items-center gap-3">
+              <Building2 className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+              <span className="text-foreground">
+                <span className="font-medium">
+                  {locale === "zh" ? "主讲人单位：" : locale === "ja" ? "所属機関：" : "Institution: "}
+                </span>
+                {invitation.speaker_institution_link ? (
+                  <a
+                    href={invitation.speaker_institution_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-primary hover:underline transition-colors"
+                  >
+                    {institution}
+                  </a>
+                ) : (
+                  institution
+                )}
+              </span>
             </div>
+          )}
 
-            {/* Bilibili Video Player */}
-            <div className="w-full">
-                <BilibiliPlayer bvid={forum.bilibiliId} title={forum.title} />
+          {/* Date */}
+          {invitation.event_time && (
+            <div className="flex items-center gap-3">
+              <Calendar className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+              <span className="text-foreground">
+                <span className="font-medium">
+                  {locale === "zh" ? "报告时间：" : locale === "ja" ? "日時：" : "Date: "}
+                </span>
+                {formatDate(invitation.event_time)}
+              </span>
             </div>
+          )}
+        </div>
+      </div>
+      </div>
 
-            {/* Forum Introduction */}
-            <div className="flex flex-col gap-4">
-                <h2 className="text-xl font-bold text-foreground">
-                    {t.forum.introduction}
-                </h2>
-                <div className="prose prose-sm sm:prose-base max-w-none text-muted-foreground leading-relaxed">
-                    <p>{forum.description}</p>
-                </div>
-            </div>
-        </main>
-        </>
-    );
+      {/* Bilibili Video Player */}
+      {invitation.video_link && (
+        <div className="w-full">
+          <BilibiliPlayer bvid={invitation.video_link} title={title} />
+        </div>
+      )}
+
+      {/* Abstract */}
+      {abstract && (
+        <div className="flex flex-col gap-4">
+          <h2 className="text-2xl font-bold text-foreground">{abstractTitle}</h2>
+          <div className="prose prose-neutral dark:prose-invert max-w-none">
+            {abstract.split('\n').filter(para => para.trim()).map((paragraph, index) => (
+              <p key={index} className="text-base leading-relaxed text-foreground indent-8 mb-4 last:mb-0">
+                {paragraph}
+              </p>
+            ))}
+          </div>
+        </div>
+      )}
+    </main>
+  );
 }
