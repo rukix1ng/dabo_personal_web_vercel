@@ -14,8 +14,6 @@ const pool = mysql.createPool({
     enableKeepAlive: true,
     keepAliveInitialDelay: 0,
     connectTimeout: 10000, // 10 seconds
-    acquireTimeout: 10000, // 10 seconds
-    timeout: 10000, // 10 seconds
 });
 
 // Helper to get a connection from the pool if needed explicitly
