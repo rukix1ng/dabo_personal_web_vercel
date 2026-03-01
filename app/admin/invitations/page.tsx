@@ -62,6 +62,7 @@ export default function InvitationsManagementPage() {
     const [error, setError] = useState("");
     const [validationErrors, setValidationErrors] = useState<string[]>([]);
     const [successMessage, setSuccessMessage] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [activeTab, setActiveTab] = useState<"zh" | "en" | "ja">("zh");
     const [formData, setFormData] = useState<InvitationFormData>({
         title_en: "",
@@ -128,6 +129,9 @@ export default function InvitationsManagementPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        // Prevent duplicate submissions
+        if (isSubmitting) return;
+
         // Validate required fields
         const errors: string[] = [];
         if (!formData.title_zh.trim()) errors.push("请填写中文标题");
@@ -143,6 +147,7 @@ export default function InvitationsManagementPage() {
         }
 
         setValidationErrors([]);
+        setIsSubmitting(true);
 
         try {
             const payload = {
@@ -175,6 +180,8 @@ export default function InvitationsManagementPage() {
             }
         } catch (error) {
             console.error("保存邀请报告出错:", error);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -658,15 +665,17 @@ export default function InvitationsManagementPage() {
                             <div className="flex gap-3 pt-4">
                                 <button
                                     type="submit"
-                                    className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 cursor-pointer"
+                                    disabled={isSubmitting}
+                                    className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                                 >
                                     <Save className="h-4 w-4" />
-                                    {editingId ? "更新" : "创建"}
+                                    {isSubmitting ? "提交中..." : (editingId ? "更新" : "创建")}
                                 </button>
                                 <button
                                     type="button"
                                     onClick={resetForm}
-                                    className="flex-1 rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted cursor-pointer"
+                                    disabled={isSubmitting}
+                                    className="flex-1 rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                                 >
                                     取消
                                 </button>

@@ -181,7 +181,7 @@ export default async function InvitationDetailPage({ params }: PageProps) {
                     href={invitation.speaker_institution_link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="hover:text-primary hover:underline transition-colors"
+                    className="text-primary underline hover:text-primary/80 transition-colors"
                   >
                     {institution}
                   </a>

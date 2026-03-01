@@ -116,7 +116,7 @@ export function InvitationCard({ invitation, locale, priority = false }: Invitat
                       href={invitation.speaker_institution_link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="hover:text-primary hover:underline transition-colors"
+                      className="text-primary underline hover:text-primary/80 transition-colors"
                     >
                       {institution}
                     </a>
@@ -166,7 +166,7 @@ export function InvitationCard({ invitation, locale, priority = false }: Invitat
               src={invitation.image}
               alt={title}
               fill
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              className="object-cover rounded-lg transition-transform duration-300 group-hover:scale-105"
               sizes="(max-width: 768px) 100vw, 192px"
               priority={priority}
             />
