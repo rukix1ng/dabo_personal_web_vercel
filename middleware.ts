@@ -25,7 +25,7 @@ function getBrowserLocale(request: NextRequest): Locale {
   return defaultLocale;
 }
 
-export function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Check if it's a language path with /admin
@@ -73,6 +73,7 @@ export function proxy(request: NextRequest) {
     path: "/",
     maxAge: 60 * 60 * 24 * 365,
   });
+  response.headers.set("x-pathname", pathname);
   return response;
 }
 
