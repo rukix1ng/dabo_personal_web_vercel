@@ -35,9 +35,9 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  // Redirect /admin to /admin/papers
+  // Redirect /admin to /admin/invitations
   if (pathname === '/admin') {
-    const redirectUrl = new URL('/admin/papers', request.url);
+    const redirectUrl = new URL('/admin/invitations', request.url);
     return NextResponse.redirect(redirectUrl);
   }
 
