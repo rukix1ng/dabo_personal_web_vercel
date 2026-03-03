@@ -462,7 +462,7 @@ export const content = {
     hero: {
       name: "半導体製造システム向け高性能材料研究",
       title: "材料基盤研究センター 先進解析領域 量子ビーム回折グループ 主任研究員",
-      description: ""
+      description: "本プロジェクトは、Lam Research Corporation（米国フリーモント）から国立研究開発法人物質・材料研究機構（NIMS、日本つくば）への戦略的寄付および関連協力に基づいて実施されています。NIMS主任研究員の達博博士がプロジェクトリーダーおよび寄付受領者を務めています。"
     },
     info: {
       phoneLabel: "電話",
