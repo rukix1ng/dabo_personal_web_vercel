@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
         sponsor_ja || null,
         sponsor_link || null,
       ]
-    );
+    ) as any;
 
     return NextResponse.json(
       { message: "Paper created successfully", id: result.insertId },
