@@ -98,8 +98,8 @@ function formatPublishDate(dateStr: string | Date | null, locale: string): strin
 
 function formatSeriesTag(seriesNumber: number, locale: string): string {
   if (locale === 'en') return `No. ${seriesNumber}`;
-  if (locale === 'ja') return `第${seriesNumber}号`;
-  return `第${seriesNumber}期`;
+  if (locale === 'ja') return `第 ${seriesNumber} 号`;
+  return `第 ${seriesNumber} 期`;
 }
 
 export default async function AchievementsPage({ params }: PageProps) {
