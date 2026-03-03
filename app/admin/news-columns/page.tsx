@@ -138,7 +138,7 @@ export default function NewsColumnsManagementPage() {
 
         try {
             // Convert month format (YYYY-MM) to full date (YYYY-MM-01) for database
-            let publishDateValue = formData.publish_date;
+            let publishDateValue: string | null = formData.publish_date;
             if (publishDateValue && publishDateValue.trim() && publishDateValue.match(/^\d{4}-\d{2}$/)) {
                 publishDateValue = `${publishDateValue}-01`;
             } else if (!publishDateValue || !publishDateValue.trim()) {
