@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Edit, Trash2, X, Save } from "lucide-react";
+import { Plus, Edit, Trash2, X, Save, Sparkles } from "lucide-react";
 import { ImageUpload } from "@/components/image-upload";
 
 interface Paper {
@@ -55,6 +55,10 @@ export default function PapersManagementPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [activeTab, setActiveTab] = useState<"zh" | "en" | "ja">("zh");
     const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+    const [isTranslating, setIsTranslating] = useState(false);
+    const [translateError, setTranslateError] = useState("");
+    const [translateSuccess, setTranslateSuccess] = useState("");
+    const [translatingFields, setTranslatingFields] = useState<Set<string>>(new Set());
     const [formData, setFormData] = useState<PaperFormData>({
         title_en: "",
         title_zh: "",
@@ -235,6 +239,103 @@ export default function PapersManagementPage() {
         setShowForm(false);
         setActiveTab("zh");
         setValidationErrors([]);
+        setTranslateError("");
+        setTranslateSuccess("");
+    };
+
+    // Handle AI translation
+    const handleTranslate = async (fieldName: string, texts: { zh?: string; en?: string; ja?: string }) => {
+        setTranslateError("");
+        setTranslateSuccess("");
+        setIsTranslating(true);
+
+        // 检查是否所有语言都已填写，如果是则跳过
+        const filledCount = Object.values(texts).filter(t => t?.trim()).length;
+        if (filledCount === 3) {
+            console.log(`字段 ${fieldName} 所有语言都已填写，跳过翻译`);
+            setIsTranslating(false);
+            return;
+        }
+
+        // 标记正在翻译的字段
+        setTranslatingFields(prev => new Set(prev).add(fieldName));
+
+        try {
+            const res = await fetch("/api/translate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ texts, fieldName }),
+            });
+
+            console.log('Response status:', res.status, res.statusText);
+
+            if (!res.ok) {
+                const errorData = await res.json();
+                console.error('Error response:', errorData);
+                const errorMessage = errorData.debug 
+                    ? `${errorData.error}\n调试信息: ${errorData.debug}`
+                    : errorData.error;
+                throw new Error(errorMessage);
+            }
+
+            const data = await res.json();
+            console.log('Success response:', data);
+
+            if (data.success && data.translations) {
+                setFormData((prev) => ({
+                    ...prev,
+                    ...(data.translations.zh && { [`${fieldName}_zh`]: data.translations.zh }),
+                    ...(data.translations.en && { [`${fieldName}_en`]: data.translations.en }),
+                    ...(data.translations.ja && { [`${fieldName}_ja`]: data.translations.ja }),
+                }));
+                setTranslateSuccess("翻译成功！");
+                setTimeout(() => setTranslateSuccess(""), 3000);
+            } else {
+                throw new Error("翻译结果无效");
+            }
+        } catch (error) {
+            console.error("翻译错误:", error);
+            setTranslateError(error instanceof Error ? error.message : "翻译失败，请稍后重试");
+            setTimeout(() => setTranslateError(""), 10000);
+        } finally {
+            // 移除正在翻译的标记
+            setTranslatingFields(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(fieldName);
+                return newSet;
+            });
+            setIsTranslating(false);
+        }
+    };
+
+    // Translate all fields
+    const handleTranslateAll = async () => {
+        setTranslateError("");
+        setTranslateSuccess("");
+        setIsTranslating(true);
+
+        try {
+            const fields = [
+                { name: "title", zh: formData.title_zh, en: formData.title_en, ja: formData.title_ja },
+                { name: "description", zh: formData.description_zh, en: formData.description_en, ja: formData.description_ja },
+                { name: "sponsor", zh: formData.sponsor_zh, en: formData.sponsor_en, ja: formData.sponsor_ja },
+            ];
+
+            for (const field of fields) {
+                const texts: { zh?: string; en?: string; ja?: string } = {};
+                if (field.zh?.trim()) texts.zh = field.zh;
+                if (field.en?.trim()) texts.en = field.en;
+                if (field.ja?.trim()) texts.ja = field.ja;
+
+                if (Object.keys(texts).length > 0) {
+                    await handleTranslate(field.name, texts);
+                }
+            }
+        } catch (error) {
+            console.error("批量翻译错误:", error);
+        } finally {
+            setIsTranslating(false);
+        }
     };
 
     if (loading) {
@@ -362,7 +463,9 @@ export default function PapersManagementPage() {
                                             onChange={(e) =>
                                                 setFormData({ ...formData, title_zh: e.target.value })
                                             }
-                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            placeholder={translatingFields.has('title') && !formData.title_zh ? 'AI 正在翻译中...' : ''}
+                                            disabled={translatingFields.has('title') && !formData.title_zh}
+                                            className={`w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${translatingFields.has('title') && !formData.title_zh ? 'animate-pulse' : ''}`}
                                         />
                                     </div>
 
@@ -376,7 +479,9 @@ export default function PapersManagementPage() {
                                                 setFormData({ ...formData, description_zh: e.target.value })
                                             }
                                             rows={6}
-                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            placeholder={translatingFields.has('description') && !formData.description_zh ? 'AI 正在翻译中...' : ''}
+                                            disabled={translatingFields.has('description') && !formData.description_zh}
+                                            className={`w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${translatingFields.has('description') && !formData.description_zh ? 'animate-pulse' : ''}`}
                                         />
                                     </div>
 
@@ -390,7 +495,9 @@ export default function PapersManagementPage() {
                                             onChange={(e) =>
                                                 setFormData({ ...formData, sponsor_zh: e.target.value })
                                             }
-                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            placeholder={translatingFields.has('sponsor') && !formData.sponsor_zh ? 'AI 正在翻译中...' : ''}
+                                            disabled={translatingFields.has('sponsor') && !formData.sponsor_zh}
+                                            className={`w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${translatingFields.has('sponsor') && !formData.sponsor_zh ? 'animate-pulse' : ''}`}
                                         />
                                     </div>
                                 </div>
@@ -409,7 +516,9 @@ export default function PapersManagementPage() {
                                             onChange={(e) =>
                                                 setFormData({ ...formData, title_en: e.target.value })
                                             }
-                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            placeholder={translatingFields.has('title') && !formData.title_en ? 'AI 正在翻译中...' : ''}
+                                            disabled={translatingFields.has('title') && !formData.title_en}
+                                            className={`w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${translatingFields.has('title') && !formData.title_en ? 'animate-pulse' : ''}`}
                                         />
                                     </div>
 
@@ -423,7 +532,9 @@ export default function PapersManagementPage() {
                                                 setFormData({ ...formData, description_en: e.target.value })
                                             }
                                             rows={6}
-                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            placeholder={translatingFields.has('description') && !formData.description_en ? 'AI 正在翻译中...' : ''}
+                                            disabled={translatingFields.has('description') && !formData.description_en}
+                                            className={`w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${translatingFields.has('description') && !formData.description_en ? 'animate-pulse' : ''}`}
                                         />
                                     </div>
 
@@ -437,7 +548,9 @@ export default function PapersManagementPage() {
                                             onChange={(e) =>
                                                 setFormData({ ...formData, sponsor_en: e.target.value })
                                             }
-                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            placeholder={translatingFields.has('sponsor') && !formData.sponsor_en ? 'AI 正在翻译中...' : ''}
+                                            disabled={translatingFields.has('sponsor') && !formData.sponsor_en}
+                                            className={`w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${translatingFields.has('sponsor') && !formData.sponsor_en ? 'animate-pulse' : ''}`}
                                         />
                                     </div>
                                 </div>
@@ -456,7 +569,9 @@ export default function PapersManagementPage() {
                                             onChange={(e) =>
                                                 setFormData({ ...formData, title_ja: e.target.value })
                                             }
-                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            placeholder={translatingFields.has('title') && !formData.title_ja ? 'AI 正在翻译中...' : ''}
+                                            disabled={translatingFields.has('title') && !formData.title_ja}
+                                            className={`w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${translatingFields.has('title') && !formData.title_ja ? 'animate-pulse' : ''}`}
                                         />
                                     </div>
 
@@ -470,7 +585,9 @@ export default function PapersManagementPage() {
                                                 setFormData({ ...formData, description_ja: e.target.value })
                                             }
                                             rows={6}
-                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            placeholder={translatingFields.has('description') && !formData.description_ja ? 'AI 正在翻译中...' : ''}
+                                            disabled={translatingFields.has('description') && !formData.description_ja}
+                                            className={`w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${translatingFields.has('description') && !formData.description_ja ? 'animate-pulse' : ''}`}
                                         />
                                     </div>
 
@@ -484,11 +601,39 @@ export default function PapersManagementPage() {
                                             onChange={(e) =>
                                                 setFormData({ ...formData, sponsor_ja: e.target.value })
                                             }
-                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            placeholder={translatingFields.has('sponsor') && !formData.sponsor_ja ? 'AI 正在翻译中...' : ''}
+                                            disabled={translatingFields.has('sponsor') && !formData.sponsor_ja}
+                                            className={`w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${translatingFields.has('sponsor') && !formData.sponsor_ja ? 'animate-pulse' : ''}`}
                                         />
                                     </div>
                                 </div>
                             )}
+
+                            {/* Translation Messages */}
+                            {translateSuccess && (
+                                <div className="rounded-lg bg-green-500/10 border border-green-500/20 px-4 py-3 text-sm text-green-600 dark:text-green-400">
+                                    {translateSuccess}
+                                </div>
+                            )}
+
+                            {translateError && (
+                                <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-600 dark:text-red-400">
+                                    {translateError}
+                                </div>
+                            )}
+
+                            {/* AI Translate Button */}
+                            <div className="flex items-center justify-start py-4">
+                                <button
+                                    type="button"
+                                    onClick={handleTranslateAll}
+                                    disabled={isTranslating}
+                                    className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-3 text-sm font-medium text-white transition-all hover:from-blue-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl cursor-pointer"
+                                >
+                                    <Sparkles className={`h-5 w-5 ${isTranslating ? "animate-spin" : ""}`} />
+                                    {isTranslating ? "AI 翻译中..." : "AI 一键翻译"}
+                                </button>
+                            </div>
 
                             {/* Common Fields */}
                             <div className="space-y-4 border-t border-border pt-4">
@@ -640,7 +785,7 @@ export default function PapersManagementPage() {
                                         colSpan={4}
                                         className="px-6 py-12 text-center text-muted-foreground"
                                     >
-                                        未找到合作论文。点击"添加合作论文"创建一个。
+                                        未找到合作论文。点击&ldquo;添加合作论文&rdquo;创建一个。
                                     </td>
                                 </tr>
                             ) : (

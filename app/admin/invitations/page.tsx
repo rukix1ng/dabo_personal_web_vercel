@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Edit, Trash2, X, Save } from "lucide-react";
+import { Plus, Edit, Trash2, X, Save, Sparkles } from "lucide-react";
 import { ImageUpload } from "@/components/image-upload";
 
 interface Invitation {
@@ -65,6 +65,10 @@ export default function InvitationsManagementPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [activeTab, setActiveTab] = useState<"zh" | "en" | "ja">("zh");
     const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+    const [isTranslating, setIsTranslating] = useState(false);
+    const [translateError, setTranslateError] = useState("");
+    const [translateSuccess, setTranslateSuccess] = useState("");
+    const [translatingFields, setTranslatingFields] = useState<Set<string>>(new Set());
     const [formData, setFormData] = useState<InvitationFormData>({
         title_en: "",
         subtitle_en: "",
@@ -270,6 +274,98 @@ export default function InvitationsManagementPage() {
         setShowForm(false);
         setActiveTab("zh");
         setValidationErrors([]);
+        setTranslateError("");
+        setTranslateSuccess("");
+    };
+
+    // Handle AI translation
+    const handleTranslate = async (fieldName: string, texts: { zh?: string; en?: string; ja?: string }) => {
+        setTranslateError("");
+        setTranslateSuccess("");
+        setIsTranslating(true);
+
+        const filledCount = Object.values(texts).filter(t => t?.trim()).length;
+        if (filledCount === 3) {
+            console.log(`字段 ${fieldName} 所有语言都已填写，跳过翻译`);
+            setIsTranslating(false);
+            return;
+        }
+
+        setTranslatingFields(prev => new Set(prev).add(fieldName));
+
+        try {
+            const res = await fetch("/api/translate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ texts, fieldName }),
+            });
+
+            if (!res.ok) {
+                const errorData = await res.json();
+                const errorMessage = errorData.debug 
+                    ? `${errorData.error}\n调试信息: ${errorData.debug}`
+                    : errorData.error;
+                throw new Error(errorMessage);
+            }
+
+            const data = await res.json();
+
+            if (data.success && data.translations) {
+                setFormData((prev) => ({
+                    ...prev,
+                    ...(data.translations.zh && { [`${fieldName}_zh`]: data.translations.zh }),
+                    ...(data.translations.en && { [`${fieldName}_en`]: data.translations.en }),
+                    ...(data.translations.ja && { [`${fieldName}_ja`]: data.translations.ja }),
+                }));
+                setTranslateSuccess("翻译成功！");
+                setTimeout(() => setTranslateSuccess(""), 3000);
+            } else {
+                throw new Error("翻译结果无效");
+            }
+        } catch (error) {
+            console.error("翻译错误:", error);
+            setTranslateError(error instanceof Error ? error.message : "翻译失败，请稍后重试");
+            setTimeout(() => setTranslateError(""), 10000);
+        } finally {
+            setTranslatingFields(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(fieldName);
+                return newSet;
+            });
+            setIsTranslating(false);
+        }
+    };
+
+    // Translate all fields
+    const handleTranslateAll = async () => {
+        setTranslateError("");
+        setTranslateSuccess("");
+        setIsTranslating(true);
+
+        try {
+            const fields = [
+                { name: "title", zh: formData.title_zh, en: formData.title_en, ja: formData.title_ja },
+                { name: "subtitle", zh: formData.subtitle_zh, en: formData.subtitle_en, ja: formData.subtitle_ja },
+                { name: "speaker", zh: formData.speaker_zh, en: formData.speaker_en, ja: formData.speaker_ja },
+                { name: "speaker_institution", zh: formData.speaker_institution_zh, en: formData.speaker_institution_en, ja: formData.speaker_institution_ja },
+                { name: "abstract", zh: formData.abstract_zh, en: formData.abstract_en, ja: formData.abstract_ja },
+            ];
+
+            for (const field of fields) {
+                const texts: { zh?: string; en?: string; ja?: string } = {};
+                if (field.zh?.trim()) texts.zh = field.zh;
+                if (field.en?.trim()) texts.en = field.en;
+                if (field.ja?.trim()) texts.ja = field.ja;
+
+                if (Object.keys(texts).length > 0) {
+                    await handleTranslate(field.name, texts);
+                }
+            }
+        } catch (error) {
+            console.error("批量翻译错误:", error);
+        } finally {
+            setIsTranslating(false);
+        }
     };
 
     if (loading) {
@@ -384,6 +480,19 @@ export default function InvitationsManagementPage() {
                         </div>
 
                         <form onSubmit={handleSubmit} className="space-y-6">
+                            {/* Translation Messages */}
+                            {translateSuccess && (
+                                <div className="rounded-lg bg-green-500/10 border border-green-500/20 px-4 py-3 text-sm text-green-600 dark:text-green-400">
+                                    {translateSuccess}
+                                </div>
+                            )}
+
+                            {translateError && (
+                                <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-600 dark:text-red-400">
+                                    {translateError}
+                                </div>
+                            )}
+
                             {/* Chinese Fields */}
                             {activeTab === "zh" && (
                                 <div className="space-y-4">
@@ -397,7 +506,9 @@ export default function InvitationsManagementPage() {
                                             onChange={(e) =>
                                                 setFormData({ ...formData, title_zh: e.target.value })
                                             }
-                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            placeholder={translatingFields.has('title') && !formData.title_zh ? 'AI 正在翻译中...' : ''}
+                                            disabled={translatingFields.has('title') && !formData.title_zh}
+                                            className={`w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${translatingFields.has('title') && !formData.title_zh ? 'animate-pulse' : ''}`}
                                         />
                                     </div>
 
@@ -411,7 +522,9 @@ export default function InvitationsManagementPage() {
                                             onChange={(e) =>
                                                 setFormData({ ...formData, subtitle_zh: e.target.value })
                                             }
-                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            placeholder={translatingFields.has('subtitle') && !formData.subtitle_zh ? 'AI 正在翻译中...' : ''}
+                                            disabled={translatingFields.has('subtitle') && !formData.subtitle_zh}
+                                            className={`w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${translatingFields.has('subtitle') && !formData.subtitle_zh ? 'animate-pulse' : ''}`}
                                         />
                                     </div>
 
@@ -425,7 +538,9 @@ export default function InvitationsManagementPage() {
                                             onChange={(e) =>
                                                 setFormData({ ...formData, speaker_zh: e.target.value })
                                             }
-                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            placeholder={translatingFields.has('speaker') && !formData.speaker_zh ? 'AI 正在翻译中...' : ''}
+                                            disabled={translatingFields.has('speaker') && !formData.speaker_zh}
+                                            className={`w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${translatingFields.has('speaker') && !formData.speaker_zh ? 'animate-pulse' : ''}`}
                                         />
                                     </div>
 
@@ -439,7 +554,9 @@ export default function InvitationsManagementPage() {
                                             onChange={(e) =>
                                                 setFormData({ ...formData, speaker_institution_zh: e.target.value })
                                             }
-                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            placeholder={translatingFields.has('speaker_institution') && !formData.speaker_institution_zh ? 'AI 正在翻译中...' : ''}
+                                            disabled={translatingFields.has('speaker_institution') && !formData.speaker_institution_zh}
+                                            className={`w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${translatingFields.has('speaker_institution') && !formData.speaker_institution_zh ? 'animate-pulse' : ''}`}
                                         />
                                     </div>
 
@@ -453,7 +570,9 @@ export default function InvitationsManagementPage() {
                                                 setFormData({ ...formData, abstract_zh: e.target.value })
                                             }
                                             rows={4}
-                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            placeholder={translatingFields.has('abstract') && !formData.abstract_zh ? 'AI 正在翻译中...' : ''}
+                                            disabled={translatingFields.has('abstract') && !formData.abstract_zh}
+                                            className={`w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${translatingFields.has('abstract') && !formData.abstract_zh ? 'animate-pulse' : ''}`}
                                         />
                                     </div>
                                 </div>
@@ -472,7 +591,9 @@ export default function InvitationsManagementPage() {
                                             onChange={(e) =>
                                                 setFormData({ ...formData, title_en: e.target.value })
                                             }
-                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            placeholder={translatingFields.has('title') && !formData.title_en ? 'AI 正在翻译中...' : ''}
+                                            disabled={translatingFields.has('title') && !formData.title_en}
+                                            className={`w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${translatingFields.has('title') && !formData.title_en ? 'animate-pulse' : ''}`}
                                         />
                                     </div>
 
@@ -486,7 +607,9 @@ export default function InvitationsManagementPage() {
                                             onChange={(e) =>
                                                 setFormData({ ...formData, subtitle_en: e.target.value })
                                             }
-                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            placeholder={translatingFields.has('subtitle') && !formData.subtitle_en ? 'AI 正在翻译中...' : ''}
+                                            disabled={translatingFields.has('subtitle') && !formData.subtitle_en}
+                                            className={`w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${translatingFields.has('subtitle') && !formData.subtitle_en ? 'animate-pulse' : ''}`}
                                         />
                                     </div>
 
@@ -500,7 +623,9 @@ export default function InvitationsManagementPage() {
                                             onChange={(e) =>
                                                 setFormData({ ...formData, speaker_en: e.target.value })
                                             }
-                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            placeholder={translatingFields.has('speaker') && !formData.speaker_en ? 'AI 正在翻译中...' : ''}
+                                            disabled={translatingFields.has('speaker') && !formData.speaker_en}
+                                            className={`w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${translatingFields.has('speaker') && !formData.speaker_en ? 'animate-pulse' : ''}`}
                                         />
                                     </div>
 
@@ -514,7 +639,9 @@ export default function InvitationsManagementPage() {
                                             onChange={(e) =>
                                                 setFormData({ ...formData, speaker_institution_en: e.target.value })
                                             }
-                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            placeholder={translatingFields.has('speaker_institution') && !formData.speaker_institution_en ? 'AI 正在翻译中...' : ''}
+                                            disabled={translatingFields.has('speaker_institution') && !formData.speaker_institution_en}
+                                            className={`w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${translatingFields.has('speaker_institution') && !formData.speaker_institution_en ? 'animate-pulse' : ''}`}
                                         />
                                     </div>
 
@@ -528,7 +655,9 @@ export default function InvitationsManagementPage() {
                                                 setFormData({ ...formData, abstract_en: e.target.value })
                                             }
                                             rows={4}
-                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            placeholder={translatingFields.has('abstract') && !formData.abstract_en ? 'AI 正在翻译中...' : ''}
+                                            disabled={translatingFields.has('abstract') && !formData.abstract_en}
+                                            className={`w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${translatingFields.has('abstract') && !formData.abstract_en ? 'animate-pulse' : ''}`}
                                         />
                                     </div>
                                 </div>
@@ -547,7 +676,9 @@ export default function InvitationsManagementPage() {
                                             onChange={(e) =>
                                                 setFormData({ ...formData, title_ja: e.target.value })
                                             }
-                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            placeholder={translatingFields.has('title') && !formData.title_ja ? 'AI 正在翻译中...' : ''}
+                                            disabled={translatingFields.has('title') && !formData.title_ja}
+                                            className={`w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${translatingFields.has('title') && !formData.title_ja ? 'animate-pulse' : ''}`}
                                         />
                                     </div>
 
@@ -561,7 +692,9 @@ export default function InvitationsManagementPage() {
                                             onChange={(e) =>
                                                 setFormData({ ...formData, subtitle_ja: e.target.value })
                                             }
-                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            placeholder={translatingFields.has('subtitle') && !formData.subtitle_ja ? 'AI 正在翻译中...' : ''}
+                                            disabled={translatingFields.has('subtitle') && !formData.subtitle_ja}
+                                            className={`w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${translatingFields.has('subtitle') && !formData.subtitle_ja ? 'animate-pulse' : ''}`}
                                         />
                                     </div>
 
@@ -575,7 +708,9 @@ export default function InvitationsManagementPage() {
                                             onChange={(e) =>
                                                 setFormData({ ...formData, speaker_ja: e.target.value })
                                             }
-                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            placeholder={translatingFields.has('speaker') && !formData.speaker_ja ? 'AI 正在翻译中...' : ''}
+                                            disabled={translatingFields.has('speaker') && !formData.speaker_ja}
+                                            className={`w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${translatingFields.has('speaker') && !formData.speaker_ja ? 'animate-pulse' : ''}`}
                                         />
                                     </div>
 
@@ -589,7 +724,9 @@ export default function InvitationsManagementPage() {
                                             onChange={(e) =>
                                                 setFormData({ ...formData, speaker_institution_ja: e.target.value })
                                             }
-                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            placeholder={translatingFields.has('speaker_institution') && !formData.speaker_institution_ja ? 'AI 正在翻译中...' : ''}
+                                            disabled={translatingFields.has('speaker_institution') && !formData.speaker_institution_ja}
+                                            className={`w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${translatingFields.has('speaker_institution') && !formData.speaker_institution_ja ? 'animate-pulse' : ''}`}
                                         />
                                     </div>
 
@@ -603,11 +740,26 @@ export default function InvitationsManagementPage() {
                                                 setFormData({ ...formData, abstract_ja: e.target.value })
                                             }
                                             rows={4}
-                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            placeholder={translatingFields.has('abstract') && !formData.abstract_ja ? 'AI 正在翻译中...' : ''}
+                                            disabled={translatingFields.has('abstract') && !formData.abstract_ja}
+                                            className={`w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${translatingFields.has('abstract') && !formData.abstract_ja ? 'animate-pulse' : ''}`}
                                         />
                                     </div>
                                 </div>
                             )}
+
+                            {/* AI Translate Button */}
+                            <div className="flex items-center justify-start py-4">
+                                <button
+                                    type="button"
+                                    onClick={handleTranslateAll}
+                                    disabled={isTranslating}
+                                    className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-3 text-sm font-medium text-white transition-all hover:from-blue-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl cursor-pointer"
+                                >
+                                    <Sparkles className={`h-5 w-5 ${isTranslating ? "animate-spin" : ""}`} />
+                                    {isTranslating ? "AI 翻译中..." : "AI 一键翻译"}
+                                </button>
+                            </div>
 
                             {/* Common Fields */}
                             <div className="space-y-4 border-t border-border pt-4">
@@ -746,7 +898,7 @@ export default function InvitationsManagementPage() {
                                         colSpan={4}
                                         className="px-6 py-12 text-center text-muted-foreground"
                                     >
-                                        未找到邀请报告。点击"添加邀请报告"创建一个。
+                                        未找到邀请报告。点击&ldquo;添加邀请报告&rdquo;创建一个。
                                     </td>
                                 </tr>
                             ) : (

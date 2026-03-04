@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(lsof -i :3000)",
+      "Bash(mysql -h 47.110.87.81 -P 3306 -u admin -plam_nims personal_web -e \"SHOW TABLES;\")",
+      "Bash(mysql -h 47.110.87.81 -P 3306 -u admin -plam_nims personal_web << 'EOF'\nCREATE TABLE invitation \\(\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  title VARCHAR\\(500\\) NOT NULL COMMENT '标题',\n  speaker VARCHAR\\(200\\) NOT NULL COMMENT '主讲人',\n  speaker_institution VARCHAR\\(300\\) COMMENT '主讲人单位',\n  event_time DATETIME COMMENT '演讲时间',\n  abstract TEXT COMMENT '摘要',\n  image VARCHAR\\(500\\) COMMENT '图片路径',\n  video_link VARCHAR\\(500\\) COMMENT '报告视频链接',\n  sort_order INT DEFAULT 0 COMMENT '排序字段，数值越小越靠前',\n  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',\n  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',\n  INDEX idx_sort_order \\(sort_order\\)\n\\) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='NIMS邀请报告表';\nEOF)",
+      "Bash(mysql -h 47.110.87.81 -P 3306 -u admin -plam_nims personal_web -e \"DESCRIBE invitation;\")",
+      "Bash(mysql -h 47.110.87.81 -P 3306 -u admin -plam_nims personal_web << 'EOF'\n-- 先删除旧表\nDROP TABLE IF EXISTS invitation;\n\n-- 创建新的多语言表\nCREATE TABLE invitation \\(\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  -- 英文字段\n  title_en VARCHAR\\(500\\) NOT NULL COMMENT '标题（英文）',\n  speaker_en VARCHAR\\(200\\) NOT NULL COMMENT '主讲人（英文）',\n  speaker_institution_en VARCHAR\\(300\\) COMMENT '主讲人单位（英文）',\n  abstract_en TEXT COMMENT '摘要（英文）',\n  -- 中文字段\n  title_zh VARCHAR\\(500\\) NOT NULL COMMENT '标题（中文）',\n  speaker_zh VARCHAR\\(200\\) NOT NULL COMMENT '主讲人（中文）',\n  speaker_institution_zh VARCHAR\\(300\\) COMMENT '主讲人单位（中文）',\n  abstract_zh TEXT COMMENT '摘要（中文）',\n  -- 日文字段\n  title_ja VARCHAR\\(500\\) NOT NULL COMMENT '标题（日文）',\n  speaker_ja VARCHAR\\(200\\) NOT NULL COMMENT '主讲人（日文）',\n  speaker_institution_ja VARCHAR\\(300\\) COMMENT '主讲人单位（日文）',\n  abstract_ja TEXT COMMENT '摘要（日文）',\n  -- 通用字段（不需要翻译）\n  event_time DATETIME COMMENT '演讲时间',\n  image VARCHAR\\(500\\) COMMENT '图片路径',\n  video_link VARCHAR\\(500\\) COMMENT '报告视频链接',\n  sort_order INT DEFAULT 0 COMMENT '排序字段，数值越小越靠前',\n  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',\n  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',\n  INDEX idx_sort_order \\(sort_order\\)\n\\) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='NIMS邀请报告表（多语言）';\nEOF)",
+      "Bash(curl -s http://localhost:3000/api/invitations | jq '.')",
+      "Bash(git add lib/i18n.ts && git commit -m \"fix: add inviterIntro field to forum i18n configuration\" && git push origin main)",
+      "Bash(git add lib/db.ts && git commit -m \"fix: remove unsupported acquireTimeout and timeout options from mysql pool config\" && git push origin main)",
+      "Bash(git add \"app/[locale]/page.tsx\" app/admin/layout.tsx components/project-news.tsx)",
+      "Bash(git commit -m \"feat: update home page layout and add project news component\" && git push origin main)",
+      "Bash(sleep 2 && git push origin main)"
+    ]
+  }
+}
