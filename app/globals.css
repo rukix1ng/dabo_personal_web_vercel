@@ -189,4 +189,34 @@
     line-height: 1.6;
     font-weight: 400; /* Changed from 450 to standard 400 for better Chinese font compatibility */
   }
+
+  /* Admin system font - force Chinese font stack */
+  .admin-font {
+    font-family: "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", "WenQuanYi Micro Hei", sans-serif;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Ensure consistent font weights in admin system */
+  .admin-font h1,
+  .admin-font h2,
+  .admin-font h3,
+  .admin-font h4,
+  .admin-font h5,
+  .admin-font h6 {
+    font-weight: 600;
+  }
+
+  .admin-font .font-bold {
+    font-weight: 600;
+  }
+
+  .admin-font .font-semibold {
+    font-weight: 600;
+  }
+
+  .admin-font .font-medium {
+    font-weight: 500;
+  }
 }

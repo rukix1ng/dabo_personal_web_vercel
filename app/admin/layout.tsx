@@ -29,7 +29,7 @@ export default async function AdminLayout({
     console.log('AdminLayout rendered, admin:', admin.username);
 
     return (
-        <div className="flex h-screen overflow-hidden bg-background">
+        <div className="flex h-screen overflow-hidden bg-background admin-font">
             {/* Sidebar */}
             <AdminNav username={admin.username} />
 
