@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { query } from '@/lib/db';
 import { getCurrentAdmin } from '@/lib/auth';
 
@@ -73,6 +74,10 @@ export async function PUT(
             ]
         );
 
+        // 立即刷新相关页面的缓存
+        revalidatePath('/[locale]/achievements', 'page');
+        revalidatePath(`/[locale]/achievements/${id}`, 'page');
+
         return NextResponse.json({ success: true });
     } catch (error) {
         console.error('Error updating news column:', error);
@@ -97,6 +102,10 @@ export async function DELETE(
         const { id } = await params;
 
         await query('DELETE FROM news_column WHERE id = ?', [id]);
+
+        // 立即刷新相关页面的缓存
+        revalidatePath('/[locale]/achievements', 'page');
+        revalidatePath(`/[locale]/achievements/${id}`, 'page');
 
         return NextResponse.json({ success: true });
     } catch (error) {

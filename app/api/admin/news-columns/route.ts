@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { query } from '@/lib/db';
 import { getCurrentAdmin } from '@/lib/auth';
 
@@ -72,9 +73,14 @@ export async function POST(request: NextRequest) {
             ]
         );
 
+        const insertId = (result as any).insertId;
+
+        // 立即刷新相关页面的缓存
+        revalidatePath('/[locale]/achievements', 'page');
+
         return NextResponse.json({
             success: true,
-            id: (result as any).insertId,
+            id: insertId,
         });
     } catch (error) {
         console.error('Error creating news column:', error);

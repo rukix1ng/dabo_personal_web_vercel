@@ -4,6 +4,9 @@ import { FormattedText } from "@/components/formatted-text";
 import type { Metadata } from "next";
 import { query } from "@/lib/db";
 
+// 启用增量静态再生成，5分钟缓存
+export const revalidate = 300;
+
 type PageProps = {
   params: Promise<{ locale: Locale }>;
 };
@@ -73,7 +76,12 @@ interface Invitation {
 async function getInvitations(): Promise<Invitation[]> {
   try {
     const invitations = await query<any>(
-      'SELECT * FROM invitation ORDER BY event_time DESC, id DESC'
+      `SELECT id, title_en, subtitle_en, speaker_en, speaker_institution_en, abstract_en,
+              title_zh, subtitle_zh, speaker_zh, speaker_institution_zh, abstract_zh,
+              title_ja, subtitle_ja, speaker_ja, speaker_institution_ja, speaker_institution_link, abstract_ja,
+              event_time, image, video_link
+       FROM invitation
+       ORDER BY event_time DESC, id DESC`
     );
     return invitations || [];
   } catch (error) {

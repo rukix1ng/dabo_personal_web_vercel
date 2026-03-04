@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { query } from '@/lib/db';
 import { getCurrentAdmin } from '@/lib/auth';
 
@@ -46,6 +47,10 @@ export async function PUT(request: NextRequest, context: RouteContext) {
             ]
         );
 
+        // 立即刷新相关页面的缓存
+        revalidatePath('/[locale]/forum', 'page');
+        revalidatePath(`/[locale]/forum/${id}`, 'page');
+
         return NextResponse.json({ success: true });
     } catch (error) {
         console.error('Error updating invitation:', error);
@@ -67,6 +72,10 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
         const { id } = await context.params;
 
         await query('DELETE FROM invitation WHERE id = ?', [parseInt(id)]);
+
+        // 立即刷新相关页面的缓存
+        revalidatePath('/[locale]/forum', 'page');
+        revalidatePath(`/[locale]/forum/${id}`, 'page');
 
         return NextResponse.json({ success: true });
     } catch (error) {

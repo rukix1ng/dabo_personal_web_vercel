@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from 'next/cache';
 import { query } from "@/lib/db";
 import { getCurrentAdmin } from "@/lib/auth";
 
@@ -98,6 +99,9 @@ export async function PUT(
       ]
     );
 
+    // 立即刷新相关页面的缓存
+    revalidatePath('/[locale]/papers', 'page');
+
     return NextResponse.json({ message: "Paper updated successfully" });
   } catch (error) {
     console.error("Error updating paper:", error);
@@ -121,6 +125,9 @@ export async function DELETE(
 
     const { id } = await params;
     await query("DELETE FROM papers WHERE id = ?", [parseInt(id)]);
+
+    // 立即刷新相关页面的缓存
+    revalidatePath('/[locale]/papers', 'page');
 
     return NextResponse.json({ message: "Paper deleted successfully" });
   } catch (error) {

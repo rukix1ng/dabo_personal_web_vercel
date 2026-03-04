@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { query } from '@/lib/db';
 import { getCurrentAdmin } from '@/lib/auth';
 
@@ -11,7 +12,12 @@ export async function GET(request: NextRequest) {
         }
 
         const invitations = await query<any>(
-            'SELECT * FROM invitation ORDER BY event_time DESC, id DESC'
+            `SELECT id, title_en, subtitle_en, speaker_en, speaker_institution_en, abstract_en,
+                    title_zh, subtitle_zh, speaker_zh, speaker_institution_zh, abstract_zh,
+                    title_ja, subtitle_ja, speaker_ja, speaker_institution_ja, speaker_institution_link, abstract_ja,
+                    event_time, image, video_link, created_at, updated_at
+             FROM invitation
+             ORDER BY event_time DESC, id DESC`
         );
 
         return NextResponse.json({ invitations });
@@ -62,9 +68,14 @@ export async function POST(request: NextRequest) {
             ]
         );
 
+        const insertId = (result as any).insertId;
+
+        // 立即刷新相关页面的缓存
+        revalidatePath('/[locale]/forum', 'page');
+
         return NextResponse.json({
             success: true,
-            id: (result as any).insertId,
+            id: insertId,
         });
     } catch (error) {
         console.error('Error creating invitation:', error);

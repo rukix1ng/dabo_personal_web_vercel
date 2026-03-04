@@ -10,7 +10,8 @@ type PageProps = {
   params: Promise<{ locale: Locale; id: string }>;
 };
 
-export const dynamic = 'force-dynamic';
+// 启用增量静态再生成，5分钟缓存
+export const revalidate = 300;
 
 interface NewsColumn {
   id: number;
@@ -34,7 +35,13 @@ interface NewsColumn {
 async function getNewsColumn(id: string): Promise<NewsColumn | null> {
   try {
     const rows = await query<any>(
-      'SELECT * FROM news_column WHERE id = ?',
+      `SELECT id, title_en, title_zh, title_ja,
+              content_en, content_zh, content_ja,
+              journal_name_en, journal_name_zh, journal_name_ja,
+              author_bio_en, author_bio_zh, author_bio_ja,
+              publish_date, series_number, image
+       FROM news_column
+       WHERE id = ?`,
       [parseInt(id)]
     );
     if (rows.length === 0) return null;

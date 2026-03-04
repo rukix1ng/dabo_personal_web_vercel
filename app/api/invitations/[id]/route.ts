@@ -11,7 +11,12 @@ export async function GET(request: NextRequest, context: RouteContext) {
         const { id } = await context.params;
 
         const invitations = await query<any>(
-            'SELECT * FROM invitation WHERE id = ?',
+            `SELECT id, title_en, subtitle_en, speaker_en, speaker_institution_en, abstract_en,
+                    title_zh, subtitle_zh, speaker_zh, speaker_institution_zh, abstract_zh,
+                    title_ja, subtitle_ja, speaker_ja, speaker_institution_ja, speaker_institution_link, abstract_ja,
+                    event_time, image, video_link
+             FROM invitation
+             WHERE id = ?`,
             [parseInt(id)]
         );
 
@@ -22,7 +27,14 @@ export async function GET(request: NextRequest, context: RouteContext) {
             );
         }
 
-        return NextResponse.json({ invitation: invitations[0] });
+        return NextResponse.json(
+            { invitation: invitations[0] },
+            {
+                headers: {
+                    'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600'
+                }
+            }
+        );
     } catch (error) {
         console.error('Error fetching invitation:', error);
         return NextResponse.json(

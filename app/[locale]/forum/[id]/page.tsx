@@ -10,7 +10,8 @@ type PageProps = {
   params: Promise<{ locale: Locale; id: string }>;
 };
 
-export const dynamic = 'force-dynamic';
+// 启用增量静态再生成，5分钟缓存
+export const revalidate = 300;
 
 interface Invitation {
   id: number;
@@ -38,7 +39,12 @@ interface Invitation {
 async function getInvitation(id: string): Promise<Invitation | null> {
   try {
     const invitations = await query<any>(
-      'SELECT * FROM invitation WHERE id = ?',
+      `SELECT id, title_en, subtitle_en, speaker_en, speaker_institution_en, abstract_en,
+              title_zh, subtitle_zh, speaker_zh, speaker_institution_zh, abstract_zh,
+              title_ja, subtitle_ja, speaker_ja, speaker_institution_ja, speaker_institution_link, abstract_ja,
+              event_time, image, video_link
+       FROM invitation
+       WHERE id = ?`,
       [parseInt(id)]
     );
 

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from 'next/cache';
 import { query } from "@/lib/db";
 import { getCurrentAdmin } from "@/lib/auth";
 
@@ -87,6 +88,9 @@ export async function POST(request: NextRequest) {
         sponsor_link || null,
       ]
     ) as any;
+
+    // 立即刷新相关页面的缓存
+    revalidatePath('/[locale]/papers', 'page');
 
     return NextResponse.json(
       { message: "Paper created successfully", id: result.insertId },
