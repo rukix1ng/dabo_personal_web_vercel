@@ -22,6 +22,7 @@ interface PapersPageClientProps {
         title: string;
         description: string;
         noResults: string;
+        sponsorLabel: string;
     };
     mockPapers: Paper[];
 }
@@ -91,7 +92,7 @@ export function PapersPageClient({ locale, papers, mockPapers }: PapersPageClien
                                     )}
                                     {paper.journal && (
                                         <div className="text-muted-foreground flex items-center gap-1">
-                                            <span>赞助企业：</span>
+                                            <span>{papers.sponsorLabel}：</span>
                                             {paper.sponsorLink && paper.sponsorLink !== '#' ? (
                                                 <a
                                                     href={paper.sponsorLink}

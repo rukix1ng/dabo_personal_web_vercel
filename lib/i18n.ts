@@ -177,6 +177,7 @@ export const content = {
       to: "to",
       of: "of",
       items: "items",
+      sponsorLabel: "Sponsor",
     },
     forum: {
       title: "NIMS Invited Talks",
@@ -407,6 +408,7 @@ export const content = {
       to: "-",
       of: "条，共",
       items: "条数据",
+      sponsorLabel: "赞助企业",
     },
     forum: {
       title: "NIMS邀请报告",
@@ -637,6 +639,7 @@ export const content = {
       to: "-",
       of: "件中",
       items: "件",
+      sponsorLabel: "スポンサー企業",
     },
     forum: {
       title: "NIMS招待講演",
