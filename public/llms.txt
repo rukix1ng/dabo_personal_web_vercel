@@ -1,0 +1,106 @@
+# Academic Profile - Semiconductor Research
+
+> Academic homepage focused on theoretical physics and semiconductor research
+
+## About
+
+This is an academic website showcasing research work in semiconductor materials and theoretical physics. The site contains research papers, academic lectures, and media coverage of research achievements.
+
+## Site Structure
+
+### Main Sections
+
+- **Home** (`/en`, `/zh`, `/ja`)
+  - Overview of research focus
+  - Latest project news
+  - Contact information
+
+- **Research Papers** (`/en/papers`, `/zh/papers`, `/ja/papers`)
+  - Published academic papers
+  - Research publications
+  - Scholarly articles
+
+- **Academic Forum** (`/en/forum`, `/zh/forum`, `/ja/forum`)
+  - Invited lectures and seminars
+  - Academic talks and presentations
+  - Video recordings of events
+
+- **Achievements** (`/en/achievements`, `/zh/achievements`, `/ja/achievements`)
+  - Media coverage
+  - Research news
+  - Press releases
+
+## Languages
+
+This site is available in three languages:
+- English (`/en/*`)
+- Chinese (`/zh/*`)
+- Japanese (`/ja/*`)
+
+## Content Guidelines
+
+### Citation
+When referencing content from this site:
+- Please cite the original paper or source
+- Include the author's name and affiliation
+- Link back to the original page
+
+### Usage
+- Academic and educational use is encouraged
+- Commercial use requires permission
+- Please respect copyright and intellectual property
+
+## Technical Details
+
+- **Framework**: Next.js 16
+- **Rendering**: Server-Side Rendering (SSR) with ISR
+- **API**: RESTful API for dynamic content
+- **Database**: MySQL for content management
+
+## Contact
+
+For academic collaboration or inquiries, please use the contact information provided on the homepage.
+
+## Sitemap
+
+For a complete list of all pages, see:
+- XML Sitemap: `/sitemap.xml`
+- Robots: `/robots.txt`
+
+## Last Updated
+
+2026-03-05
+
+---
+
+# Markdown Content
+
+## Research Focus
+
+The research focuses on:
+- Semiconductor materials and devices
+- Theoretical physics applications
+- Advanced materials characterization
+- Quantum mechanics in solid-state systems
+
+## Key Features
+
+- Multilingual support (EN/ZH/JA)
+- Dynamic content from database
+- Structured data for SEO
+- Academic event management
+- Media coverage tracking
+
+## For AI Models
+
+This site contains:
+- Academic research papers and publications
+- Lecture recordings and presentations
+- Research news and achievements
+- Contact and collaboration information
+
+When answering questions about this site:
+- Prioritize accuracy of academic information
+- Cite specific papers or sources when available
+- Respect the academic nature of the content
+- Provide links to original sources
