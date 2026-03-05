@@ -90,15 +90,56 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const title = locale === 'zh' ? item.title_zh : locale === 'ja' ? item.title_ja : item.title_en;
   const description = locale === 'zh' ? item.content_zh : locale === 'ja' ? item.content_ja : item.content_en;
+  const journalName = locale === 'zh' ? item.journal_name_zh : locale === 'ja' ? item.journal_name_ja : item.journal_name_en;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
   return {
     title: `${title} | ${t.navigation.achievements} | ${t.meta.title}`,
     description: description?.substring(0, 160) || title,
+    keywords: [
+      ...t.meta.keywords,
+      "news",
+      "media coverage",
+      "research news",
+      journalName || "",
+    ].filter(Boolean),
+    authors: [{ name: journalName || t.meta.title }],
+    alternates: {
+      canonical: `/${locale}/achievements/${id}`,
+      languages: {
+        en: `/en/achievements/${id}`,
+        zh: `/zh/achievements/${id}`,
+        ja: `/ja/achievements/${id}`,
+      },
+    },
     openGraph: {
       title: `${title} | ${t.navigation.achievements}`,
       description: description?.substring(0, 160) || title,
       type: "article",
       locale: locale === "en" ? "en_US" : locale === "zh" ? "zh_CN" : "ja_JP",
+      url: `${baseUrl}/${locale}/achievements/${id}`,
+      siteName: t.meta.title,
+      images: item.image
+        ? [
+            {
+              url: item.image,
+              width: 1200,
+              height: 630,
+              alt: title,
+            },
+          ]
+        : undefined,
+      article: {
+        publishedTime: item.publish_date ? new Date(item.publish_date).toISOString() : undefined,
+        authors: [journalName || t.meta.title],
+        section: t.navigation.achievements,
+        tags: ["news", "media", "research"],
+      },
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${title} | ${t.navigation.achievements}`,
+      description: description?.substring(0, 160) || title,
       images: item.image ? [item.image] : undefined,
     },
   };
@@ -119,8 +160,72 @@ export default async function NewsColumnDetailPage({ params }: PageProps) {
   const dateDisplay = formatPublishDate(item.publish_date, locale);
   const seriesTag = formatSeriesTag(item.series_number, locale);
 
+  // 生成结构化数据
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+
+  // BreadcrumbList 结构化数据
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": t.navigation.home || "Home",
+        "item": `${baseUrl}/${locale}`,
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": t.navigation.achievements,
+        "item": `${baseUrl}/${locale}/achievements`,
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": title,
+        "item": `${baseUrl}/${locale}/achievements/${id}`,
+      },
+    ],
+  };
+
+  // NewsArticle 结构化数据
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    "headline": title,
+    "description": contentText?.substring(0, 200) || title,
+    "image": item.image ? [item.image] : undefined,
+    "datePublished": item.publish_date ? new Date(item.publish_date).toISOString() : undefined,
+    "author": {
+      "@type": "Organization",
+      "name": journalName || t.meta.title,
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": t.meta.title,
+      "logo": {
+        "@type": "ImageObject",
+        "url": `${baseUrl}/icon.png`,
+      },
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": `${baseUrl}/${locale}/achievements/${id}`,
+    },
+  };
+
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-4xl flex-col gap-8 px-4 py-10 sm:px-6 lg:px-8">
+      {/* 结构化数据 */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
       {/* Back Button */}
       <Link
         href={`/${locale}/achievements`}

@@ -73,15 +73,58 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const title = locale === "zh" ? invitation.title_zh : locale === "ja" ? invitation.title_ja : invitation.title_en;
   const abstract = locale === "zh" ? invitation.abstract_zh : locale === "ja" ? invitation.abstract_ja : invitation.abstract_en;
+  const speaker = locale === "zh" ? invitation.speaker_zh : locale === "ja" ? invitation.speaker_ja : invitation.speaker_en;
+  const institution = locale === "zh" ? invitation.speaker_institution_zh : locale === "ja" ? invitation.speaker_institution_ja : invitation.speaker_institution_en;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
   return {
     title: `${title} | ${t.forum.title} | ${t.meta.title}`,
     description: abstract || title,
+    keywords: [
+      ...t.meta.keywords,
+      "academic lecture",
+      "seminar",
+      "research talk",
+      speaker,
+      institution || "",
+    ].filter(Boolean),
+    authors: [{ name: speaker }],
+    alternates: {
+      canonical: `/${locale}/forum/${id}`,
+      languages: {
+        en: `/en/forum/${id}`,
+        zh: `/zh/forum/${id}`,
+        ja: `/ja/forum/${id}`,
+      },
+    },
     openGraph: {
       title: `${title} | ${t.forum.title}`,
       description: abstract || title,
       type: "article",
       locale: locale === "en" ? "en_US" : locale === "zh" ? "zh_CN" : "ja_JP",
+      url: `${baseUrl}/${locale}/forum/${id}`,
+      siteName: t.meta.title,
+      images: invitation.image
+        ? [
+            {
+              url: invitation.image,
+              width: 1200,
+              height: 630,
+              alt: title,
+            },
+          ]
+        : undefined,
+      article: {
+        publishedTime: invitation.event_time ? new Date(invitation.event_time).toISOString() : undefined,
+        authors: [speaker],
+        section: t.forum.title,
+        tags: ["lecture", "seminar", "academic"],
+      },
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${title} | ${t.forum.title}`,
+      description: abstract || title,
       images: invitation.image ? [invitation.image] : undefined,
     },
   };
@@ -134,8 +177,78 @@ export default async function InvitationDetailPage({ params }: PageProps) {
     }
   };
 
+  // 生成结构化数据
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+
+  // BreadcrumbList 结构化数据
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": t.navigation.home || "Home",
+        "item": `${baseUrl}/${locale}`,
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": t.forum.title,
+        "item": `${baseUrl}/${locale}/forum`,
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": title,
+        "item": `${baseUrl}/${locale}/forum/${id}`,
+      },
+    ],
+  };
+
+  // Event 结构化数据
+  const eventJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    "name": title,
+    "description": abstract || title,
+    "startDate": invitation.event_time ? new Date(invitation.event_time).toISOString() : undefined,
+    "eventStatus": "https://schema.org/EventScheduled",
+    "eventAttendanceMode": "https://schema.org/OnlineEventAttendanceMode",
+    "location": {
+      "@type": "VirtualLocation",
+      "url": `${baseUrl}/${locale}/forum/${id}`,
+    },
+    "image": invitation.image ? [invitation.image] : undefined,
+    "performer": {
+      "@type": "Person",
+      "name": speaker,
+      "affiliation": institution
+        ? {
+            "@type": "Organization",
+            "name": institution,
+            "url": invitation.speaker_institution_link || undefined,
+          }
+        : undefined,
+    },
+    "organizer": {
+      "@type": "Organization",
+      "name": t.meta.title,
+      "url": baseUrl,
+    },
+  };
+
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-4xl flex-col gap-8 px-4 py-10 sm:px-6 lg:px-8">
+      {/* 结构化数据 */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(eventJsonLd) }}
+      />
       {/* Back Button */}
       <Link
         href={`/${locale}/forum`}
