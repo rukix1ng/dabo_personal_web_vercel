@@ -40,6 +40,8 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
+  openGraph: undefined,
+  twitter: undefined,
   robots: {
     index: true,
     follow: true,
