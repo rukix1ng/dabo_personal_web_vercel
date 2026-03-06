@@ -1,8 +1,8 @@
 import { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://yourdomain.com';
-  
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://47.110.87.81:3000';
+
   return {
     rules: [
       {
