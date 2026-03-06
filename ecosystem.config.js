@@ -28,7 +28,7 @@ module.exports = {
         env: {
             NODE_ENV: 'production',
             PORT: 3000,
-            NEXT_PUBLIC_BASE_URL: 'http://47.110.87.81:3000',
+            NEXT_PUBLIC_BASE_URL: 'http://47.110.87.81',
             // 增加 Node.js 内存使用限制到1G
             NODE_OPTIONS: '--max-old-space-size=1024',
             // Volcano Engine AI Translation
