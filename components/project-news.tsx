@@ -9,6 +9,8 @@ type FeaturedNews = {
   title: string;
   date: string;
   image: string;
+  href: string;
+  external?: boolean;
 };
 
 type NewsItem = {
@@ -62,20 +64,41 @@ export function ProjectNews({ locale, featured, list }: ProjectNewsProps) {
         {/* Featured News List */}
         <div className="flex flex-col gap-4">
           {featured.map((news) => (
-            <button
+            <div
               key={news.id}
-              onClick={() => setSelectedNewsId(news.id)}
-              className={`group flex cursor-pointer flex-col gap-2 rounded-lg border p-4 text-left transition-all ${
+              className={`group flex cursor-pointer flex-col gap-2 rounded-lg border p-4 transition-all ${
                 selectedNews.id === news.id
                   ? "border-primary bg-primary/5 shadow-md"
                   : "border-border bg-card hover:border-primary/40 hover:bg-card/60"
               }`}
             >
-              <h3 className="text-base font-bold text-foreground transition-colors group-hover:text-primary">
-                {news.title}
-              </h3>
-              <span className="text-xs text-muted-foreground">{news.date}</span>
-            </button>
+              <button
+                onClick={() => setSelectedNewsId(news.id)}
+                className="flex flex-col gap-2 text-left w-full"
+              >
+                <h3 className="text-base font-bold text-foreground transition-colors group-hover:text-primary">
+                  {news.title}
+                </h3>
+                <span className="text-xs text-muted-foreground">{news.date}</span>
+              </button>
+              {news.external ? (
+                <a
+                  href={news.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-primary hover:underline transition-colors"
+                >
+                  {locale === "zh" ? "查看更多 →" : locale === "ja" ? "もっと見る →" : "View More →"}
+                </a>
+              ) : (
+                <Link
+                  href={news.href}
+                  className="text-xs text-primary hover:underline transition-colors"
+                >
+                  {locale === "zh" ? "查看更多 →" : locale === "ja" ? "もっと見る →" : "View More →"}
+                </Link>
+              )}
+            </div>
           ))}
         </div>
       </div>

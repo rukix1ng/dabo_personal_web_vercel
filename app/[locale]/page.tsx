@@ -68,6 +68,8 @@ type HomepageFeaturedItem = {
   title: string;
   date: string;
   image: string;
+  href: string;
+  external?: boolean;
 };
 
 type HomepageListItem = {
@@ -141,6 +143,8 @@ async function getHomepageProjectNews(locale: Locale): Promise<{
           title: pickLocalizedTitle(locale, latest),
           date: getDate(latest),
           image: getImage(latest),
+          href: getHref(latest),
+          external: isExternal?.(latest) ?? false,
         });
       }
 
