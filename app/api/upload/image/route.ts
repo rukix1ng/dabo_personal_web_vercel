@@ -19,6 +19,13 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'No file provided' }, { status: 400 });
         }
 
+        if (file.size === 0) {
+            return NextResponse.json(
+                { error: 'Empty file provided' },
+                { status: 400 }
+            );
+        }
+
         // Validate file type
         const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
         if (!allowedTypes.includes(file.type)) {
@@ -71,9 +78,8 @@ export async function POST(request: NextRequest) {
         const buffer = Buffer.from(arrayBuffer);
 
         // Upload to Qiniu
-        const config = new qiniu.conf.Config({
-            zone: qiniu.zone.Zone_z0, // 华东-浙江2
-        });
+        // Let the Qiniu SDK resolve the bucket region automatically.
+        const config = new qiniu.conf.Config();
         const formUploader = new qiniu.form_up.FormUploader(config);
         const putExtra = new qiniu.form_up.PutExtra();
 
@@ -94,8 +100,13 @@ export async function POST(request: NextRequest) {
                         console.log('Upload successful, key:', body.key);
                         resolve(body.key);
                     } else {
-                        console.error('Qiniu upload failed:', info);
-                        reject(new Error(`Upload failed with status ${info.statusCode}: ${JSON.stringify(info)}`));
+                        console.error('Qiniu upload failed:', { info, body });
+                        const bodyMessage =
+                            body && typeof body === 'object' && 'error' in body
+                                ? String(body.error)
+                                : '';
+                        const detail = bodyMessage || JSON.stringify(info);
+                        reject(new Error(`Upload failed with status ${info.statusCode}: ${detail}`));
                     }
                 }
             );
