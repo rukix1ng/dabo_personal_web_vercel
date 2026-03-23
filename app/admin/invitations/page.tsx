@@ -272,6 +272,7 @@ export default function InvitationsManagementPage() {
             abstract_ja: "",
             event_time: "",
             image: "",
+            poster: "",
             video_link: "",
         });
         setEditingId(null);
