@@ -214,9 +214,10 @@ export default async function NewsColumnDetailPage({ params }: PageProps) {
               {journalName}
             </span>
           )}
-          <span className="inline-flex rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-bold tracking-wider text-primary">
+          {/* Series tag hidden */}
+          {/* <span className="inline-flex rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-bold tracking-wider text-primary">
             {seriesTag}
-          </span>
+          </span> */}
           {dateDisplay && (
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
               <Calendar className="h-3.5 w-3.5" />
