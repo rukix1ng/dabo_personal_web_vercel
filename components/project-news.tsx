@@ -66,7 +66,7 @@ export function ProjectNews({ locale, featured, list }: ProjectNewsProps) {
           {featured.map((news) => (
             <div
               key={news.id}
-              className={`group flex cursor-pointer flex-col gap-2 rounded-lg border p-4 transition-all ${
+              className={`flex flex-col gap-2 rounded-lg border p-4 transition-all ${
                 selectedNews.id === news.id
                   ? "border-primary bg-primary/5 shadow-md"
                   : "border-border bg-card hover:border-primary/40 hover:bg-card/60"
@@ -74,9 +74,9 @@ export function ProjectNews({ locale, featured, list }: ProjectNewsProps) {
             >
               <button
                 onClick={() => setSelectedNewsId(news.id)}
-                className="flex flex-col gap-2 text-left w-full"
+                className="flex flex-col gap-2 text-left w-full cursor-pointer"
               >
-                <h3 className="text-base font-bold text-foreground transition-colors group-hover:text-primary">
+                <h3 className="text-base font-bold text-foreground transition-colors hover:text-primary">
                   {news.title}
                 </h3>
                 <span className="text-xs text-muted-foreground">{news.date}</span>
@@ -86,14 +86,14 @@ export function ProjectNews({ locale, featured, list }: ProjectNewsProps) {
                   href={news.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-primary hover:underline transition-colors"
+                  className="text-xs text-primary hover:underline transition-colors w-fit"
                 >
                   {locale === "zh" ? "查看更多 →" : locale === "ja" ? "もっと見る →" : "View More →"}
                 </a>
               ) : (
                 <Link
                   href={news.href}
-                  className="text-xs text-primary hover:underline transition-colors"
+                  className="text-xs text-primary hover:underline transition-colors w-fit"
                 >
                   {locale === "zh" ? "查看更多 →" : locale === "ja" ? "もっと見る →" : "View More →"}
                 </Link>
