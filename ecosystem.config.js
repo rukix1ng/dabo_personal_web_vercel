@@ -4,6 +4,46 @@ const path = require('path');
 
 const isStandalone = fs.existsSync(path.join(__dirname, '.next/standalone/server.js'));
 
+function loadEnvFile(filePath) {
+    if (!fs.existsSync(filePath)) {
+        return {};
+    }
+
+    const content = fs.readFileSync(filePath, 'utf8');
+    const env = {};
+
+    for (const rawLine of content.split('\n')) {
+        const line = rawLine.trim();
+        if (!line || line.startsWith('#')) {
+            continue;
+        }
+
+        const separatorIndex = line.indexOf('=');
+        if (separatorIndex === -1) {
+            continue;
+        }
+
+        const key = line.slice(0, separatorIndex).trim();
+        let value = line.slice(separatorIndex + 1).trim();
+
+        if (
+            (value.startsWith('"') && value.endsWith('"')) ||
+            (value.startsWith("'") && value.endsWith("'"))
+        ) {
+            value = value.slice(1, -1);
+        }
+
+        env[key] = value;
+    }
+
+    return env;
+}
+
+const envFromFile = {
+    ...loadEnvFile(path.join(__dirname, '.env.production')),
+    ...loadEnvFile(path.join(__dirname, '.env.local')),
+};
+
 module.exports = {
     apps: [{
         name: 'dabo-personal',
@@ -26,6 +66,7 @@ module.exports = {
         wait_ready: true, // 等待应用就绪
         listen_timeout: 10000, // 10秒超时
         env: {
+            ...envFromFile,
             NODE_ENV: 'production',
             PORT: 3000,
             NEXT_PUBLIC_BASE_URL: 'http://47.110.87.81',
