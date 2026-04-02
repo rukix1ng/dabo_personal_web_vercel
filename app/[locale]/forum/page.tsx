@@ -64,7 +64,7 @@ interface Invitation {
 
 async function getInvitations(): Promise<Invitation[]> {
   try {
-    const invitations = await query<any>(
+    const invitations = await query<Invitation>(
       `SELECT id, title_en, subtitle_en, speaker_en, speaker_institution_en, abstract_en,
               title_zh, subtitle_zh, speaker_zh, speaker_institution_zh, abstract_zh,
               title_ja, subtitle_ja, speaker_ja, speaker_institution_ja, speaker_institution_link, abstract_ja,
@@ -140,7 +140,7 @@ export default async function ForumPage({ params }: PageProps) {
         {/* Divider */}
         <div className="border-t border-border" />
 
-        {/* NIMS Invited Talks Section */}
+        {/* Invited Talks Section */}
         <section id="invited-talks" className="flex flex-col gap-8">
           <div className="flex items-center gap-4">
             <div className="h-8 w-1.5 bg-primary rounded-full" />

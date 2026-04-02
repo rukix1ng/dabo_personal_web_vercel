@@ -1,17 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
+import type { ResultSetHeader } from 'mysql2/promise';
 import { query } from '@/lib/db';
 import { getCurrentAdmin } from '@/lib/auth';
 
+type NewsColumnRecord = Record<string, unknown>;
+
 // GET /api/admin/news-columns - Get all news columns
-export async function GET(request: NextRequest) {
+export async function GET() {
     try {
         const admin = await getCurrentAdmin();
         if (!admin) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const newsColumns = await query<any>(
+        const newsColumns = await query<NewsColumnRecord>(
             `SELECT id, title_en, title_zh, title_ja,
                     display_title_en, display_title_zh, display_title_ja,
                     content_en, content_zh, content_ja,
@@ -47,7 +50,7 @@ export async function POST(request: NextRequest) {
             content_en, content_zh, content_ja,
             journal_name_en, journal_name_zh, journal_name_ja,
             author_bio_en, author_bio_zh, author_bio_ja,
-            publish_date, series_number, image, is_published
+            publish_date, series_number, image
         } = body;
 
         // Validate required fields
@@ -58,7 +61,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const result = await query(
+        const result = await query<ResultSetHeader>(
             `INSERT INTO news_column (
                 title_en, title_zh, title_ja,
                 display_title_en, display_title_zh, display_title_ja,
@@ -77,7 +80,7 @@ export async function POST(request: NextRequest) {
             ]
         );
 
-        const insertId = (result as any).insertId;
+        const insertId = result[0]?.insertId;
 
         // 立即刷新相关页面的缓存
         revalidatePath('/[locale]/achievements', 'page');

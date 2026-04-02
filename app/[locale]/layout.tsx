@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { content, locales, type Locale } from "@/lib/i18n";
 import { Navbar } from "@/components/navbar";
-import { cookies } from "next/headers";
 
 const ogLocales: Record<Locale, string> = {
   en: "en_US",

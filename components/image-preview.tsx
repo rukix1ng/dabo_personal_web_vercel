@@ -11,10 +11,8 @@ interface ImagePreviewProps {
 
 export function ImagePreview({ src, alt, className }: ImagePreviewProps) {
   const [isZoomed, setIsZoomed] = useState(false);
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
     if (isZoomed) {
       document.body.style.overflow = "hidden";
     } else {
@@ -45,6 +43,7 @@ export function ImagePreview({ src, alt, className }: ImagePreviewProps) {
       </button>
 
       <div className="relative max-h-[90vh] max-w-[90vw] animate-in zoom-in-95 duration-300 ease-out">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={src}
           alt={alt}
@@ -60,6 +59,7 @@ export function ImagePreview({ src, alt, className }: ImagePreviewProps) {
         className="group/image relative cursor-pointer"
         onClick={() => setIsZoomed(true)}
       >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={src}
           alt={alt}
@@ -90,7 +90,7 @@ export function ImagePreview({ src, alt, className }: ImagePreviewProps) {
       </div>
 
       {/* Global Zoom Overlay (Portal to Body) */}
-      {mounted && isZoomed && createPortal(modalContent, document.body)}
+      {isZoomed && typeof document !== "undefined" && createPortal(modalContent, document.body)}
     </>
   );
 }

@@ -3,6 +3,8 @@ import { revalidatePath } from 'next/cache';
 import { query } from '@/lib/db';
 import { getCurrentAdmin } from '@/lib/auth';
 
+type NewsColumnRecord = Record<string, unknown>;
+
 // GET /api/admin/news-columns/[id] - Get single news column
 export async function GET(
     request: NextRequest,
@@ -16,7 +18,7 @@ export async function GET(
 
         const { id } = await params;
 
-        const newsColumns = await query<any>(
+        const newsColumns = await query<NewsColumnRecord>(
             'SELECT * FROM news_column WHERE id = ?',
             [id]
         );

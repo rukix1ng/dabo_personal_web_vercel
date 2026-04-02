@@ -1,5 +1,6 @@
-import { content, type Locale, locales } from "@/lib/i18n";
+import { content, type Locale } from "@/lib/i18n";
 import Link from "next/link";
+import Image from "next/image";
 import { Calendar, User, Building2, ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -78,8 +79,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const abstract = locale === "zh" ? invitation.abstract_zh : locale === "ja" ? invitation.abstract_ja : invitation.abstract_en;
   const speaker = locale === "zh" ? invitation.speaker_zh : locale === "ja" ? invitation.speaker_ja : invitation.speaker_en;
   const institution = locale === "zh" ? invitation.speaker_institution_zh : locale === "ja" ? invitation.speaker_institution_ja : invitation.speaker_institution_en;
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-
   return {
     title: `${title} | ${t.forum.title} | ${t.meta.title}`,
     description: abstract || title,
@@ -301,9 +300,12 @@ export default async function InvitationDetailPage({ params }: PageProps) {
         <div className="flex flex-col gap-4">
           <h2 className="text-2xl font-bold text-foreground">{posterSectionTitle}</h2>
           <div className="w-full overflow-hidden rounded-lg border border-border">
-            <img
+            <Image
               src={invitation.poster}
               alt={`${title} poster`}
+              width={1200}
+              height={1600}
+              sizes="100vw"
               className="h-auto w-full object-contain"
             />
           </div>

@@ -53,7 +53,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   // Get dynamic content IDs
-  const { papers, invitations, newsColumns } = await getDynamicIds();
+  const { invitations, newsColumns } = await getDynamicIds();
 
   const routes: MetadataRoute.Sitemap = [];
 

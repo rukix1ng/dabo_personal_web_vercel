@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Edit, Trash2, X, Save, Sparkles } from "lucide-react";
 import { ImageUpload } from "@/components/image-upload";
@@ -108,7 +108,7 @@ export default function InvitationsManagementPage() {
     });
 
     // Fetch invitations
-    const fetchInvitations = async () => {
+    const fetchInvitations = useCallback(async () => {
         try {
             const res = await fetch("/api/admin/invitations");
             if (!res.ok) {
@@ -130,11 +130,11 @@ export default function InvitationsManagementPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [router]);
 
     useEffect(() => {
-        fetchInvitations();
-    }, []);
+        void fetchInvitations();
+    }, [fetchInvitations]);
 
     // Auto-hide success message after 3 seconds
     useEffect(() => {
@@ -1016,7 +1016,7 @@ export default function InvitationsManagementPage() {
                                     </td>
                                 </tr>
                             ) : (
-                                invitations.map((invitation, index) => (
+                                invitations.map((invitation) => (
                                     <tr
                                         key={invitation.id}
                                         className="border-b border-border transition-colors hover:bg-muted/50"

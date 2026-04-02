@@ -227,7 +227,7 @@ export default async function LocaleHome({ params }: PageProps) {
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-12 px-4 py-12 sm:px-6 lg:px-8">
-      {/* Semiconductor Industry Introduction Section */}
+      {/* Background Introduction Section */}
       <section id="industry-intro" className="flex flex-col gap-8">
         <div className="flex items-center gap-4">
           <div className="h-8 w-1.5 bg-primary rounded-full" />

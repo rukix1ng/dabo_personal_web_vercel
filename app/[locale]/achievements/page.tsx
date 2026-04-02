@@ -57,7 +57,7 @@ interface NewsColumn {
 
 async function getNewsColumns(): Promise<NewsColumn[]> {
   try {
-    const newsColumns = await query<any>(
+    const newsColumns = await query<NewsColumn>(
       `SELECT id, title_en, title_zh, title_ja,
               content_en, content_zh, content_ja,
               journal_name_en, journal_name_zh, journal_name_ja,
@@ -75,12 +75,6 @@ async function getNewsColumns(): Promise<NewsColumn[]> {
 
 function formatPublishDate(dateStr: string | Date | null, locale: string): string {
   return formatYearMonth(dateStr, locale === "en" ? "en" : "zh");
-}
-
-function formatSeriesTag(seriesNumber: number, locale: string): string {
-  if (locale === 'en') return `No. ${seriesNumber}`;
-  if (locale === 'ja') return `第 ${seriesNumber} 号`;
-  return `第 ${seriesNumber} 期`;
 }
 
 export default async function AchievementsPage({ params }: PageProps) {
@@ -114,8 +108,6 @@ export default async function AchievementsPage({ params }: PageProps) {
               const content_text = locale === 'zh' ? item.content_zh : locale === 'ja' ? item.content_ja : item.content_en;
               const journalName = locale === 'zh' ? item.journal_name_zh : locale === 'ja' ? item.journal_name_ja : item.journal_name_en;
               const dateDisplay = formatPublishDate(item.publish_date, locale);
-              const seriesTag = formatSeriesTag(item.series_number, locale);
-
               return (
                 <article
                   key={item.id}

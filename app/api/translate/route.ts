@@ -20,14 +20,6 @@ interface VolcanoOutputItem {
   content?: Array<{ type: string; text: string }>;
 }
 
-interface VolcanoResponse {
-  created_at: number;
-  id: string;
-  model: string;
-  object: string;
-  output: VolcanoOutputItem[];
-}
-
 export async function POST(request: NextRequest) {
   try {
     const admin = await getCurrentAdmin();

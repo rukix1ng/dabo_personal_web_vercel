@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 
+type InvitationRecord = Record<string, unknown>;
+
 // GET /api/invitations - Get all invitations (public)
 export async function GET() {
     try {
-        const invitations = await query<any>(
+        const invitations = await query<InvitationRecord>(
             `SELECT id, title_en, title_zh, title_ja,
                     description_en, description_zh, description_ja,
                     event_time, location_en, location_zh, location_ja,

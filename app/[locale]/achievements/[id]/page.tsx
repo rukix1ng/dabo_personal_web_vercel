@@ -1,4 +1,4 @@
-import { content, type Locale, locales } from "@/lib/i18n";
+import { content, type Locale } from "@/lib/i18n";
 import Link from "next/link";
 import { ArrowLeft, Calendar, BookOpen } from "lucide-react";
 import type { Metadata } from "next";
@@ -35,7 +35,7 @@ interface NewsColumn {
 
 async function getNewsColumn(id: string): Promise<NewsColumn | null> {
   try {
-    const rows = await query<any>(
+    const rows = await query<NewsColumn>(
       `SELECT id, title_en, title_zh, title_ja,
               content_en, content_zh, content_ja,
               journal_name_en, journal_name_zh, journal_name_ja,
@@ -57,12 +57,6 @@ function formatPublishDate(dateStr: string | Date | null, locale: string): strin
   return formatYearMonth(dateStr, locale === "en" ? "en" : "zh");
 }
 
-function formatSeriesTag(seriesNumber: number, locale: string): string {
-  if (locale === 'en') return `No. ${seriesNumber}`;
-  if (locale === 'ja') return `第 ${seriesNumber} 号`;
-  return `第 ${seriesNumber} 期`;
-}
-
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale: localeParam, id } = await params;
   const locale = localeParam in content ? localeParam : "en";
@@ -76,8 +70,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const title = locale === 'zh' ? item.title_zh : locale === 'ja' ? item.title_ja : item.title_en;
   const description = locale === 'zh' ? item.content_zh : locale === 'ja' ? item.content_ja : item.content_en;
   const journalName = locale === 'zh' ? item.journal_name_zh : locale === 'ja' ? item.journal_name_ja : item.journal_name_en;
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-
   return {
     title: `${title} | ${t.navigation.achievements} | ${t.meta.title}`,
     description: description?.substring(0, 160) || title,
@@ -113,8 +105,6 @@ export default async function NewsColumnDetailPage({ params }: PageProps) {
   const journalName = locale === 'zh' ? item.journal_name_zh : locale === 'ja' ? item.journal_name_ja : item.journal_name_en;
   const authorBio = locale === 'zh' ? item.author_bio_zh : locale === 'ja' ? item.author_bio_ja : item.author_bio_en;
   const dateDisplay = formatPublishDate(item.publish_date, locale);
-  const seriesTag = formatSeriesTag(item.series_number, locale);
-
   // 生成结构化数据
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 

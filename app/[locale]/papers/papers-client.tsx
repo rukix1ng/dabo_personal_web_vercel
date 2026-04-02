@@ -27,7 +27,7 @@ interface PapersPageClientProps {
     mockPapers: Paper[];
 }
 
-export function PapersPageClient({ locale, papers, mockPapers }: PapersPageClientProps) {
+export function PapersPageClient({ papers, mockPapers }: PapersPageClientProps) {
     return (
         <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-6 px-4 py-10 sm:px-6 lg:px-8">
             <div className="flex items-center gap-4 mb-2">
@@ -43,7 +43,7 @@ export function PapersPageClient({ locale, papers, mockPapers }: PapersPageClien
                 </div>
             ) : (
                 <div className="flex flex-col divide-y divide-border">
-                    {mockPapers.map((paper, index) => (
+                    {mockPapers.map((paper) => (
                         <article
                             key={paper.id}
                             className="group flex flex-col sm:flex-row gap-4 py-6 transition-colors hover:bg-muted/30"

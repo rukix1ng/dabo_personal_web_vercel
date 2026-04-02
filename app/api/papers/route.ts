@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { query } from "@/lib/db";
 
 // GET - 获取所有论文（公开API）
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const papers = await query(
       `SELECT id, title_en, title_zh, title_ja,

@@ -41,7 +41,7 @@ export async function verifyToken(token: string): Promise<AdminUser | null> {
             id: payload.userId as number,
             username: payload.username as string,
         };
-    } catch (error) {
+    } catch {
         return null;
     }
 }

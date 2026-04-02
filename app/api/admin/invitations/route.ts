@@ -34,7 +34,7 @@ interface InvitationAdminRow {
 }
 
 // GET /api/admin/invitations - Get all invitations
-export async function GET(request: NextRequest) {
+export async function GET() {
     try {
         const admin = await getCurrentAdmin();
         if (!admin) {

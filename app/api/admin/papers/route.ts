@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from 'next/cache';
+import type { ResultSetHeader } from "mysql2/promise";
 import { query } from "@/lib/db";
 import { getCurrentAdmin } from "@/lib/auth";
 
 // GET - 获取所有论文
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const admin = await getCurrentAdmin();
     if (!admin) {
@@ -69,7 +70,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await query(
+    const result = await query<ResultSetHeader>(
       `INSERT INTO papers (
         title_en, title_zh, title_ja,
         display_title_en, display_title_zh, display_title_ja,
@@ -96,13 +97,13 @@ export async function POST(request: NextRequest) {
         sponsor_ja || null,
         sponsor_link || null,
       ]
-    ) as any;
+    );
 
     // 立即刷新相关页面的缓存
     revalidatePath('/[locale]/papers', 'page');
 
     return NextResponse.json(
-      { message: "Paper created successfully", id: result.insertId },
+      { message: "Paper created successfully", id: result[0]?.insertId },
       { status: 201 }
     );
   } catch (error) {

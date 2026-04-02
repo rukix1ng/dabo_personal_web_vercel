@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Edit, Trash2, X, Save, Sparkles } from "lucide-react";
 import { ImageUpload } from "@/components/image-upload";
@@ -90,7 +90,7 @@ export default function NewsColumnsManagementPage() {
     });
 
     // Fetch news columns
-    const fetchNewsColumns = async () => {
+    const fetchNewsColumns = useCallback(async () => {
         try {
             const res = await fetch("/api/admin/news-columns");
             if (!res.ok) {
@@ -112,11 +112,11 @@ export default function NewsColumnsManagementPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [router]);
 
     useEffect(() => {
-        fetchNewsColumns();
-    }, []);
+        void fetchNewsColumns();
+    }, [fetchNewsColumns]);
 
     // Auto-hide success message after 3 seconds
     useEffect(() => {

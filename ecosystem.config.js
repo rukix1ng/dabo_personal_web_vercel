@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 // 检测是否使用 standalone 模式
 const fs = require('fs');
 const path = require('path');

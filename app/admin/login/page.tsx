@@ -34,7 +34,7 @@ export default function LoginPage() {
             // 重定向到管理员仪表盘
             router.push("/admin");
             router.refresh();
-        } catch (err) {
+        } catch {
             setError("发生错误，请重试");
             setLoading(false);
         }

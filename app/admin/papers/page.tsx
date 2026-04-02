@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Edit, Trash2, X, Save, Sparkles } from "lucide-react";
 import { ImageUpload } from "@/components/image-upload";
@@ -86,7 +86,7 @@ export default function PapersManagementPage() {
     });
 
     // Fetch papers
-    const fetchPapers = async () => {
+    const fetchPapers = useCallback(async () => {
         try {
             const res = await fetch("/api/admin/papers");
             if (!res.ok) {
@@ -108,11 +108,11 @@ export default function PapersManagementPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [router]);
 
     useEffect(() => {
-        fetchPapers();
-    }, []);
+        void fetchPapers();
+    }, [fetchPapers]);
 
     // Auto-hide success message after 3 seconds
     useEffect(() => {
