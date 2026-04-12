@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentAdmin } from '@/lib/auth';
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import qiniu from 'qiniu';
 
 // POST /api/upload/image - Upload image to Qiniu
@@ -49,9 +50,23 @@ export async function POST(request: NextRequest) {
         const secretKey = process.env.QINIU_SECRET_KEY;
         const bucket = process.env.QINIU_BUCKET;
         const domain = process.env.QINIU_DOMAIN;
+        const supabaseEndpoint = process.env.SUPABASE_S3_ENDPOINT;
+        const supabaseBucket = process.env.SUPABASE_S3_BUCKET;
+        const supabaseAccessKey = process.env.SUPABASE_S3_ACCESS_KEY;
+        const supabaseSecretKey = process.env.SUPABASE_S3_SECRET_KEY;
+        const supabaseRegion = process.env.SUPABASE_S3_REGION || 'us-east-1';
 
-        if (!accessKey || !secretKey || !bucket || !domain) {
-            console.error('Qiniu credentials not configured');
+        if (
+            !accessKey ||
+            !secretKey ||
+            !bucket ||
+            !domain ||
+            !supabaseEndpoint ||
+            !supabaseBucket ||
+            !supabaseAccessKey ||
+            !supabaseSecretKey
+        ) {
+            console.error('Storage credentials not fully configured');
             return NextResponse.json(
                 { error: 'Storage service not configured' },
                 { status: 500 }
@@ -113,14 +128,38 @@ export async function POST(request: NextRequest) {
         });
 
         const uploadedKey = await uploadPromise;
+        const normalizedDomain = domain.replace(/\/$/, '');
+        const cnUrl = `${normalizedDomain}/${uploadedKey}`;
 
-        // Generate public URL (no signature needed for public bucket)
-        const url = `${domain}/${uploadedKey}`;
-        console.log('Upload successful, URL:', url);
+        const supabaseClient = new S3Client({
+            region: supabaseRegion,
+            endpoint: supabaseEndpoint,
+            forcePathStyle: true,
+            credentials: {
+                accessKeyId: supabaseAccessKey,
+                secretAccessKey: supabaseSecretKey,
+            },
+        });
+
+        await supabaseClient.send(
+            new PutObjectCommand({
+                Bucket: supabaseBucket,
+                Key: key,
+                Body: buffer,
+                ContentType: file.type,
+                CacheControl: 'public, max-age=31536000, immutable',
+            })
+        );
+
+        const supabaseUrl = new URL(supabaseEndpoint);
+        const publicHost = supabaseUrl.hostname.replace('.storage.supabase.co', '.supabase.co');
+        const enUrl = `${supabaseUrl.protocol}//${publicHost}/storage/v1/object/public/${supabaseBucket}/${uploadedKey}`;
+        console.log('Upload successful', { cnUrl, enUrl });
 
         return NextResponse.json({
             success: true,
-            url,
+            url: cnUrl,
+            url_en: enUrl,
             filename: file.name,
             size: file.size,
         });

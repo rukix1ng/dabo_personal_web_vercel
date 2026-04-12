@@ -11,7 +11,7 @@ export async function GET() {
                     description_en, description_zh, description_ja,
                     event_time, location_en, location_zh, location_ja,
                     organizer_en, organizer_zh, organizer_ja,
-                    image, created_at, updated_at
+                    image, image_en, created_at, updated_at
              FROM invitation
              ORDER BY event_time DESC, id DESC`
         );

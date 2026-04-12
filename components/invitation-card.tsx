@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Calendar, User, Building2 } from "lucide-react";
 import type { Locale } from "@/lib/i18n";
 import { formatLocalDateTime } from "@/lib/date-time";
+import { getInvitationImageUrl } from "@/lib/invitation-assets";
 
 interface Invitation {
   id: number;
@@ -26,6 +27,7 @@ interface Invitation {
   abstract_ja: string | null;
   event_time: string | null;
   image: string | null;
+  image_en: string | null;
   video_link: string | null;
 }
 
@@ -41,6 +43,7 @@ export function InvitationCard({ invitation, locale, priority = false }: Invitat
   const speaker = locale === "zh" ? invitation.speaker_zh : locale === "ja" ? invitation.speaker_ja : invitation.speaker_en;
   const institution = locale === "zh" ? invitation.speaker_institution_zh : locale === "ja" ? invitation.speaker_institution_ja : invitation.speaker_institution_en;
   const abstract = locale === "zh" ? invitation.abstract_zh : locale === "ja" ? invitation.abstract_ja : invitation.abstract_en;
+  const imageUrl = getInvitationImageUrl(invitation);
 
   const viewMoreText = locale === "zh" ? "查看更多" : locale === "ja" ? "詳細を見る" : "View More";
   const speakerLabel = locale === "zh" ? "主讲人：" : locale === "ja" ? "講演者：" : "Speaker: ";
@@ -136,10 +139,10 @@ export function InvitationCard({ invitation, locale, priority = false }: Invitat
         </div>
 
         {/* Image */}
-        {invitation.image && (
+        {imageUrl && (
           <div className="relative w-full md:w-48 h-48 md:h-auto md:self-stretch flex-shrink-0 overflow-hidden rounded-lg bg-muted">
             <Image
-              src={invitation.image}
+              src={imageUrl}
               alt={title}
               fill
               className="object-cover rounded-lg transition-transform duration-300 group-hover:scale-105"

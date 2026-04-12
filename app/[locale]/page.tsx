@@ -4,6 +4,7 @@ import { ProjectNews } from "@/components/project-news";
 import { query } from "@/lib/db";
 import type { Metadata } from "next";
 import { formatMonthInputValue } from "@/lib/date-time";
+import { getInvitationImageUrl, getInvitationPosterUrl } from "@/lib/invitation-assets";
 
 type PageProps = {
   params: Promise<{ locale: string }>;
@@ -44,7 +45,9 @@ type InvitationRecord = {
   display_title_zh: string | null;
   display_title_ja: string | null;
   image: string | null;
+  image_en: string | null;
   poster: string | null;
+  poster_en: string | null;
   event_time: string | null;
 };
 
@@ -119,7 +122,7 @@ async function getHomepageProjectNews(locale: Locale): Promise<{
   try {
     const [invitations, newsColumns, papers] = await Promise.all([
       query<InvitationRecord>(
-        `SELECT id, title_en, title_zh, title_ja, display_title_en, display_title_zh, display_title_ja, image, poster, event_time
+        `SELECT id, title_en, title_zh, title_ja, display_title_en, display_title_zh, display_title_ja, image, image_en, poster, poster_en, event_time
          FROM invitation
          ORDER BY event_time DESC, id DESC
          LIMIT 3`
@@ -178,7 +181,7 @@ async function getHomepageProjectNews(locale: Locale): Promise<{
       "invitation",
       invitations,
       (row) => formatDateValue(row.event_time),
-      (row) => row.poster || row.image || "",
+      (row) => getInvitationPosterUrl(row) || getInvitationImageUrl(row) || "",
       (row) => `/${locale}/forum/${row.id}`
     );
     pushGroupItems(

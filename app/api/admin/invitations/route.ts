@@ -26,7 +26,9 @@ interface InvitationAdminRow {
     display_title_ja: string | null;
     event_time: string | null;
     image: string | null;
+    image_en: string | null;
     poster: string | null;
+    poster_en: string | null;
     video_link: string | null;
     youtube_link: string | null;
     created_at: string;
@@ -46,7 +48,7 @@ export async function GET() {
                     title_zh, subtitle_zh, speaker_zh, speaker_institution_zh, abstract_zh,
                     title_ja, subtitle_ja, speaker_ja, speaker_institution_ja, speaker_institution_link, abstract_ja,
                     display_title_en, display_title_zh, display_title_ja,
-                    event_time, image, poster, video_link, youtube_link, created_at, updated_at
+                    event_time, image, image_en, poster, poster_en, video_link, youtube_link, created_at, updated_at
              FROM invitation
              ORDER BY event_time DESC, id DESC`
         );
@@ -75,7 +77,7 @@ export async function POST(request: NextRequest) {
             title_zh, subtitle_zh, speaker_zh, speaker_institution_zh, abstract_zh,
             title_ja, subtitle_ja, speaker_ja, speaker_institution_ja, speaker_institution_link, abstract_ja,
             display_title_en, display_title_zh, display_title_ja,
-            event_time, image, poster, video_link, youtube_link
+            event_time, image, image_en, poster, poster_en, video_link, youtube_link
         } = body;
 
         if (!title_en || !speaker_en || !title_zh || !speaker_zh || !title_ja || !speaker_ja) {
@@ -91,14 +93,14 @@ export async function POST(request: NextRequest) {
                 title_zh, subtitle_zh, speaker_zh, speaker_institution_zh, abstract_zh,
                 title_ja, subtitle_ja, speaker_ja, speaker_institution_ja, speaker_institution_link, abstract_ja,
                 display_title_en, display_title_zh, display_title_ja,
-                event_time, image, poster, video_link, youtube_link
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                event_time, image, image_en, poster, poster_en, video_link, youtube_link
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 title_en, subtitle_en || null, speaker_en, speaker_institution_en || null, abstract_en || null,
                 title_zh, subtitle_zh || null, speaker_zh, speaker_institution_zh || null, abstract_zh || null,
                 title_ja, subtitle_ja || null, speaker_ja, speaker_institution_ja || null, speaker_institution_link || null, abstract_ja || null,
                 display_title_en || null, display_title_zh || null, display_title_ja || null,
-                event_time || null, image || null, poster || null, video_link || null, youtube_link || null
+                event_time || null, image || null, image_en || null, poster || null, poster_en || null, video_link || null, youtube_link || null
             ]
         );
 

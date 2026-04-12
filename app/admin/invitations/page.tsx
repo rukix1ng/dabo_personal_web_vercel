@@ -29,7 +29,9 @@ interface Invitation {
     display_title_ja: string | null;
     event_time: string | null;
     image: string | null;
+    image_en: string | null;
     poster: string | null;
+    poster_en: string | null;
     video_link: string | null;
     youtube_link: string | null;
     created_at: string;
@@ -58,7 +60,9 @@ interface InvitationFormData {
     display_title_ja: string;
     event_time: string;
     image: string;
+    image_en: string;
     poster: string;
+    poster_en: string;
     youtube_link: string;
     video_link: string;
 }
@@ -102,7 +106,9 @@ export default function InvitationsManagementPage() {
         display_title_ja: "",
         event_time: "",
         image: "",
+        image_en: "",
         poster: "",
+        poster_en: "",
         youtube_link: "",
         video_link: "",
     });
@@ -261,7 +267,9 @@ export default function InvitationsManagementPage() {
             display_title_ja: invitation.display_title_ja || "",
             event_time: formatDateTimeLocalValue(invitation.event_time),
             image: invitation.image || "",
+            image_en: invitation.image_en || "",
             poster: invitation.poster || "",
+            poster_en: invitation.poster_en || "",
             youtube_link: invitation.youtube_link || "",
             video_link: invitation.video_link || "",
         });
@@ -292,7 +300,9 @@ export default function InvitationsManagementPage() {
             display_title_ja: "",
             event_time: "",
             image: "",
+            image_en: "",
             poster: "",
+            poster_en: "",
             youtube_link: "",
             video_link: "",
         });
@@ -904,6 +914,13 @@ export default function InvitationsManagementPage() {
                                 <ImageUpload
                                     value={formData.image}
                                     onChange={(url) => setFormData({ ...formData, image: url })}
+                                    onUploaded={({ url, url_en }) =>
+                                        setFormData((prev) => ({
+                                            ...prev,
+                                            image: url,
+                                            image_en: url_en || prev.image_en,
+                                        }))
+                                    }
                                     folder="invitations"
                                     label="图片"
                                 />
@@ -911,6 +928,13 @@ export default function InvitationsManagementPage() {
                                 <ImageUpload
                                     value={formData.poster}
                                     onChange={(url) => setFormData({ ...formData, poster: url })}
+                                    onUploaded={({ url, url_en }) =>
+                                        setFormData((prev) => ({
+                                            ...prev,
+                                            poster: url,
+                                            poster_en: url_en || prev.poster_en,
+                                        }))
+                                    }
                                     folder="invitations"
                                     label="海报"
                                 />

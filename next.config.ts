@@ -1,5 +1,18 @@
 import type { NextConfig } from "next";
 
+const defaultSupabasePublicHostname = "rumctlarycfedcaazxmk.supabase.co";
+const supabaseEndpoint = process.env.SUPABASE_S3_ENDPOINT;
+const supabasePublicHostnames = new Set<string>([defaultSupabasePublicHostname]);
+
+if (supabaseEndpoint) {
+  try {
+    const { hostname } = new URL(supabaseEndpoint);
+    supabasePublicHostnames.add(hostname.replace(".storage.supabase.co", ".supabase.co"));
+  } catch {
+    // Ignore malformed runtime endpoint and fall back to the known public hostname.
+  }
+}
+
 const nextConfig: NextConfig = {
   // Optimize images for SEO
   images: {
@@ -27,6 +40,11 @@ const nextConfig: NextConfig = {
         hostname: 'dabowebsite.s3.cn-east-1.qiniucs.com',
         pathname: '/**',
       },
+      ...Array.from(supabasePublicHostnames).map((hostname) => ({
+        protocol: 'https' as const,
+        hostname,
+        pathname: '/storage/v1/object/public/**',
+      })),
     ],
   },
   // Enable compression for better performance

@@ -7,6 +7,7 @@ import Image from "next/image";
 interface ImageUploadProps {
     value: string;
     onChange: (url: string) => void;
+    onUploaded?: (result: { url: string; url_en?: string }) => void;
     folder?: string;
     label?: string;
     required?: boolean;
@@ -15,6 +16,7 @@ interface ImageUploadProps {
 export function ImageUpload({
     value,
     onChange,
+    onUploaded,
     folder = "uploads",
     label = "图片",
     required = false,
@@ -61,6 +63,7 @@ export function ImageUpload({
 
             const data = await res.json();
             onChange(data.url);
+            onUploaded?.(data);
         } catch (err) {
             console.error("Upload error:", err);
             setError(err instanceof Error ? err.message : "上传失败，请重试");

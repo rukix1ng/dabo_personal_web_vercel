@@ -1,0 +1,3 @@
+ALTER TABLE invitation
+  ADD COLUMN image_en VARCHAR(500) NULL AFTER image,
+  ADD COLUMN poster_en VARCHAR(500) NULL AFTER poster;

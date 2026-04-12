@@ -7,6 +7,7 @@ import { notFound } from "next/navigation";
 import { query } from "@/lib/db";
 import { YoutubePlayer } from "@/components/youtube-player";
 import { formatLocalDateTime, formatStructuredDateTime } from "@/lib/date-time";
+import { getInvitationImageUrl, getInvitationPosterUrl } from "@/lib/invitation-assets";
 import { getAbsoluteUrl, getSiteUrl } from "@/lib/site-url";
 
 type PageProps = {
@@ -36,7 +37,9 @@ interface Invitation {
   abstract_ja: string | null;
   event_time: string | null;
   image: string | null;
+  image_en: string | null;
   poster: string | null;
+  poster_en: string | null;
   video_link: string | null;
   youtube_link: string | null;
 }
@@ -47,7 +50,7 @@ async function getInvitation(id: string): Promise<Invitation | null> {
       `SELECT id, title_en, subtitle_en, speaker_en, speaker_institution_en, abstract_en,
               title_zh, subtitle_zh, speaker_zh, speaker_institution_zh, abstract_zh,
               title_ja, subtitle_ja, speaker_ja, speaker_institution_ja, speaker_institution_link, abstract_ja,
-              event_time, image, poster, video_link, youtube_link
+              event_time, image, image_en, poster, poster_en, video_link, youtube_link
        FROM invitation
        WHERE id = ?`,
       [parseInt(id)]
@@ -119,6 +122,8 @@ export default async function InvitationDetailPage({ params }: PageProps) {
   const speaker = locale === "zh" ? invitation.speaker_zh : locale === "ja" ? invitation.speaker_ja : invitation.speaker_en;
   const institution = locale === "zh" ? invitation.speaker_institution_zh : locale === "ja" ? invitation.speaker_institution_ja : invitation.speaker_institution_en;
   const abstract = locale === "zh" ? invitation.abstract_zh : locale === "ja" ? invitation.abstract_ja : invitation.abstract_en;
+  const imageUrl = getInvitationImageUrl(invitation);
+  const posterUrl = getInvitationPosterUrl(invitation);
   const videoSectionTitle = locale === "zh" ? "报告视频" : locale === "ja" ? "講演動画" : "Talk Video";
   const posterSectionTitle = locale === "zh" ? "海报" : locale === "ja" ? "ポスター" : "Poster";
 
@@ -169,7 +174,7 @@ export default async function InvitationDetailPage({ params }: PageProps) {
       "@type": "VirtualLocation",
       "url": getAbsoluteUrl(`/${locale}/forum/${id}`),
     },
-    "image": invitation.image ? [invitation.image] : undefined,
+    "image": imageUrl ? [imageUrl] : undefined,
     "performer": {
       "@type": "Person",
       "name": speaker,
@@ -297,12 +302,12 @@ export default async function InvitationDetailPage({ params }: PageProps) {
       )}
 
       {/* Poster */}
-      {invitation.poster && (
+      {posterUrl && (
         <div className="flex flex-col gap-4">
           <h2 className="text-2xl font-bold text-foreground">{posterSectionTitle}</h2>
           <div className="w-full overflow-hidden rounded-lg border border-border">
             <Image
-              src={invitation.poster}
+              src={posterUrl}
               alt={`${title} poster`}
               width={1200}
               height={1600}

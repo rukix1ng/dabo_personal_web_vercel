@@ -4,6 +4,7 @@ import { FormattedText } from "@/components/formatted-text";
 import type { Metadata } from "next";
 import { query } from "@/lib/db";
 import { formatStructuredDateTime } from "@/lib/date-time";
+import { getInvitationImageUrl } from "@/lib/invitation-assets";
 import { getAbsoluteUrl } from "@/lib/site-url";
 
 // 启用增量静态再生成，5分钟缓存
@@ -57,6 +58,7 @@ interface Invitation {
   abstract_ja: string | null;
   event_time: string | null;
   image: string | null;
+  image_en: string | null;
   video_link: string | null;
   sort_order: number;
   created_at: string;
@@ -69,7 +71,7 @@ async function getInvitations(): Promise<Invitation[]> {
       `SELECT id, title_en, subtitle_en, speaker_en, speaker_institution_en, abstract_en,
               title_zh, subtitle_zh, speaker_zh, speaker_institution_zh, abstract_zh,
               title_ja, subtitle_ja, speaker_ja, speaker_institution_ja, speaker_institution_link, abstract_ja,
-              event_time, image, video_link
+              event_time, image, image_en, video_link
        FROM invitation
        ORDER BY event_time DESC, id DESC`
     );
@@ -109,6 +111,7 @@ export default async function ForumPage({ params }: PageProps) {
             "@type": "Person",
             name: locale === 'zh' ? invitation.speaker_zh : locale === 'ja' ? invitation.speaker_ja : invitation.speaker_en,
           },
+          image: getInvitationImageUrl(invitation) || undefined,
           url: getAbsoluteUrl(`/${locale}/forum/${invitation.id}`),
         },
       })),
