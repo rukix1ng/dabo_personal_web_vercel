@@ -20,8 +20,8 @@ function normalizeSiteUrl(value: string | undefined): string | null {
 
 export function getSiteUrl(): string {
   return (
-    normalizeSiteUrl(process.env.NEXT_PUBLIC_BASE_URL) ||
     normalizeSiteUrl(process.env.VERCEL_PROJECT_PRODUCTION_URL) ||
+    normalizeSiteUrl(process.env.NEXT_PUBLIC_BASE_URL) ||
     normalizeSiteUrl(process.env.VERCEL_URL) ||
     DEFAULT_DEV_SITE_URL
   );
