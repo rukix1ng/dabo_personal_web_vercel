@@ -921,6 +921,10 @@ export default function InvitationsManagementPage() {
                                             image_en: url_en || prev.image_en,
                                         }))
                                     }
+                                    extraUrls={[
+                                        { label: "国内七牛云", value: formData.image },
+                                        { label: "国外 Supabase", value: formData.image_en },
+                                    ]}
                                     folder="invitations"
                                     label="图片"
                                 />
@@ -935,6 +939,10 @@ export default function InvitationsManagementPage() {
                                             poster_en: url_en || prev.poster_en,
                                         }))
                                     }
+                                    extraUrls={[
+                                        { label: "国内七牛云", value: formData.poster },
+                                        { label: "国外 Supabase", value: formData.poster_en },
+                                    ]}
                                     folder="invitations"
                                     label="海报"
                                 />

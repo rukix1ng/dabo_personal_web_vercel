@@ -8,6 +8,7 @@ interface ImageUploadProps {
     value: string;
     onChange: (url: string) => void;
     onUploaded?: (result: { url: string; url_en?: string; warnings?: string[] }) => void;
+    extraUrls?: Array<{ label: string; value: string }>;
     folder?: string;
     label?: string;
     required?: boolean;
@@ -17,6 +18,7 @@ export function ImageUpload({
     value,
     onChange,
     onUploaded,
+    extraUrls = [],
     folder = "uploads",
     label = "图片",
     required = false,
@@ -116,6 +118,14 @@ export function ImageUpload({
                     <div className="mt-2 text-xs text-muted-foreground truncate">
                         {value}
                     </div>
+                    {extraUrls
+                        .filter((item) => item.value)
+                        .map((item) => (
+                            <div key={item.label} className="mt-1 text-xs text-muted-foreground break-all">
+                                <span className="font-medium text-foreground">{item.label}：</span>
+                                {item.value}
+                            </div>
+                        ))}
                 </div>
             ) : (
                 <div
@@ -158,13 +168,23 @@ export function ImageUpload({
             )}
 
             {!value && (
-                <input
-                    type="text"
-                    value={value}
-                    onChange={(e) => onChange(e.target.value)}
-                    placeholder="或直接输入图片URL"
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                />
+                <>
+                    <input
+                        type="text"
+                        value={value}
+                        onChange={(e) => onChange(e.target.value)}
+                        placeholder="或直接输入图片URL"
+                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    />
+                    {extraUrls
+                        .filter((item) => item.value)
+                        .map((item) => (
+                            <div key={item.label} className="text-xs text-muted-foreground break-all">
+                                <span className="font-medium text-foreground">{item.label}：</span>
+                                {item.value}
+                            </div>
+                        ))}
+                </>
             )}
         </div>
     );
