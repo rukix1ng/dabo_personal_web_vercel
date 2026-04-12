@@ -44,6 +44,7 @@ interface Paper {
   author: string | null;
   journal_name: string | null;
   image: string | null;
+  image_en: string | null;
   description_en: string | null;
   description_zh: string | null;
   description_ja: string | null;
@@ -73,7 +74,7 @@ async function getPapers(locale: Locale): Promise<TransformedPaper[]> {
   try {
     const papers = await query<Paper>(
       `SELECT id, title_en, title_zh, title_ja,
-              author, journal_name, image,
+              author, journal_name, image, image_en,
               description_en, description_zh, description_ja,
               paper_link, sponsor_en, sponsor_zh, sponsor_ja,
               sponsor_link, created_at, updated_at
@@ -95,7 +96,7 @@ async function getPapers(locale: Locale): Promise<TransformedPaper[]> {
         journalName: paper.journal_name,
         date: extractYear(paper.created_at),
         url: paper.paper_link || '#',
-        image: paper.image,
+        image: paper.image_en || paper.image,
         description: description,
         sponsorLink: paper.sponsor_link,
       };

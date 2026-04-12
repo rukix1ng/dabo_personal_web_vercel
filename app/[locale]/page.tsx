@@ -73,6 +73,7 @@ type PaperRecord = {
   display_title_zh: string | null;
   display_title_ja: string | null;
   image: string | null;
+  image_en: string | null;
   created_at: string;
   paper_link: string | null;
 };
@@ -135,7 +136,7 @@ async function getHomepageProjectNews(locale: Locale): Promise<{
          LIMIT 3`
       ),
       query<PaperRecord>(
-        `SELECT id, title_en, title_zh, title_ja, display_title_en, display_title_zh, display_title_ja, image, created_at, paper_link
+        `SELECT id, title_en, title_zh, title_ja, display_title_en, display_title_zh, display_title_ja, image, image_en, created_at, paper_link
          FROM papers
          ORDER BY created_at DESC, id DESC
          LIMIT 3`
@@ -196,7 +197,7 @@ async function getHomepageProjectNews(locale: Locale): Promise<{
       "paper",
       papers,
       (row) => formatDateValue(row.created_at),
-      (row) => row.image || "",
+      (row) => row.image_en || row.image || "",
       (row) => row.paper_link || `/${locale}/papers`,
       (row) => Boolean(row.paper_link && row.paper_link !== "#")
     );

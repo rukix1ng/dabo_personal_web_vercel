@@ -16,6 +16,7 @@ interface Paper {
     author: string | null;
     journal_name: string | null;
     image: string | null;
+    image_en: string | null;
     description_en: string | null;
     description_zh: string | null;
     description_ja: string | null;
@@ -38,6 +39,7 @@ interface PaperFormData {
     author: string;
     journal_name: string;
     image: string;
+    image_en: string;
     description_en: string;
     description_zh: string;
     description_ja: string;
@@ -75,6 +77,7 @@ export default function PapersManagementPage() {
         author: "",
         journal_name: "",
         image: "",
+        image_en: "",
         description_en: "",
         description_zh: "",
         description_ja: "",
@@ -217,6 +220,7 @@ export default function PapersManagementPage() {
             author: paper.author || "",
             journal_name: paper.journal_name || "",
             image: paper.image || "",
+            image_en: paper.image_en || "",
             description_en: paper.description_en || "",
             description_zh: paper.description_zh || "",
             description_ja: paper.description_ja || "",
@@ -241,6 +245,7 @@ export default function PapersManagementPage() {
             author: "",
             journal_name: "",
             image: "",
+            image_en: "",
             description_en: "",
             description_zh: "",
             description_ja: "",
@@ -798,6 +803,17 @@ export default function PapersManagementPage() {
                                 <ImageUpload
                                     value={formData.image}
                                     onChange={(url) => setFormData({ ...formData, image: url })}
+                                    onUploaded={({ url, url_en }) =>
+                                        setFormData((prev) => ({
+                                            ...prev,
+                                            image: url,
+                                            image_en: url_en || prev.image_en,
+                                        }))
+                                    }
+                                    extraUrls={[
+                                        { label: "国内七牛云", value: formData.image },
+                                        { label: "国外 Supabase", value: formData.image_en },
+                                    ]}
                                     folder="papers"
                                     label="论文图片"
                                 />
