@@ -66,6 +66,7 @@ interface TransformedPaper {
   date: string;
   url: string;
   image: string | null;
+  imageFallback: string | null;
   description: string | null;
   sponsorLink: string | null;
 }
@@ -97,6 +98,7 @@ async function getPapers(locale: Locale): Promise<TransformedPaper[]> {
         date: extractYear(paper.created_at),
         url: paper.paper_link || '#',
         image: paper.image_en || paper.image,
+        imageFallback: paper.image_en ? paper.image : null,
         description: description,
         sponsorLink: paper.sponsor_link,
       };

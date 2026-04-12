@@ -6,11 +6,19 @@ import { createPortal } from "react-dom";
 interface ImagePreviewProps {
   src: string;
   alt: string;
+  fallbackSrc?: string;
   className?: string;
 }
 
-export function ImagePreview({ src, alt, className }: ImagePreviewProps) {
+export function ImagePreview({ src, alt, fallbackSrc, className }: ImagePreviewProps) {
   const [isZoomed, setIsZoomed] = useState(false);
+  const [currentSrc, setCurrentSrc] = useState(src);
+
+  const handleError = () => {
+    if (fallbackSrc && currentSrc !== fallbackSrc) {
+      setCurrentSrc(fallbackSrc);
+    }
+  };
 
   useEffect(() => {
     if (isZoomed) {
@@ -45,9 +53,10 @@ export function ImagePreview({ src, alt, className }: ImagePreviewProps) {
       <div className="relative max-h-[90vh] max-w-[90vw] animate-in zoom-in-95 duration-300 ease-out">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={src}
+          src={currentSrc}
           alt={alt}
           className="max-h-[90vh] max-w-[90vw] object-contain"
+          onError={handleError}
         />
       </div>
     </div>
@@ -61,9 +70,10 @@ export function ImagePreview({ src, alt, className }: ImagePreviewProps) {
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={src}
+          src={currentSrc}
           alt={alt}
           className={className}
+          onError={handleError}
         />
         {/* Hover icon indicator */}
         <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover/image:opacity-100">

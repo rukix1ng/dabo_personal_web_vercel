@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { X, Loader2, Image as ImageIcon } from "lucide-react";
 import Image from "next/image";
 
@@ -26,6 +26,16 @@ export function ImageUpload({
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState("");
     const [warning, setWarning] = useState("");
+    const [previewSrc, setPreviewSrc] = useState(value);
+
+    useEffect(() => {
+        setPreviewSrc(value);
+    }, [value]);
+
+    const handlePreviewError = () => {
+        const fallback = extraUrls.find((u) => u.value && u.value !== previewSrc)?.value;
+        if (fallback) setPreviewSrc(fallback);
+    };
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -101,10 +111,11 @@ export function ImageUpload({
                 <div className="relative group">
                     <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-border bg-muted">
                         <Image
-                            src={value}
+                            src={previewSrc}
                             alt="Uploaded image"
                             fill
                             className="object-contain"
+                            onError={handlePreviewError}
                         />
                     </div>
                     <button

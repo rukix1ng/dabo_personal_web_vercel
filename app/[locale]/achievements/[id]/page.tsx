@@ -213,6 +213,7 @@ export default async function NewsColumnDetailPage({ params }: PageProps) {
       {(item.image_en || item.image) && (
         <ImagePreview
           src={item.image_en || item.image || ''}
+          fallbackSrc={item.image_en ? item.image || undefined : undefined}
           alt={title}
           className="w-full h-auto rounded-lg"
         />

@@ -12,6 +12,7 @@ interface Paper {
     date: string;
     url: string;
     image: string | null;
+    imageFallback: string | null;
     description: string | null;
     sponsorLink: string | null;
 }
@@ -53,6 +54,7 @@ export function PapersPageClient({ papers, mockPapers }: PapersPageClientProps) 
                                 <div className="w-full sm:w-48 lg:w-56 shrink-0">
                                     <ImagePreview
                                         src={paper.image}
+                                        fallbackSrc={paper.imageFallback || undefined}
                                         alt={paper.title}
                                         className="w-full h-auto rounded-lg transition-transform duration-300 group-hover:scale-105 cursor-pointer"
                                     />

@@ -8,6 +8,7 @@ import { createPortal } from "react-dom";
 interface MediaImageProps {
   src: string;
   alt: string;
+  fallbackSrc?: string;
   className?: string;
   sizes?: string;
   gallery?: { src: string; alt: string }[];
@@ -15,8 +16,9 @@ interface MediaImageProps {
   priority?: boolean;
 }
 
-export function MediaImage({ src, alt, className, sizes, gallery, initialIndex = 0, priority = false }: MediaImageProps) {
+export function MediaImage({ src, alt, fallbackSrc, className, sizes, gallery, initialIndex = 0, priority = false }: MediaImageProps) {
   const [hasError, setHasError] = useState(false);
+  const [currentSrc, setCurrentSrc] = useState(src);
   const [isZoomed, setIsZoomed] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [currentGalleryIndex, setCurrentGalleryIndex] = useState(initialIndex);
@@ -121,12 +123,18 @@ export function MediaImage({ src, alt, className, sizes, gallery, initialIndex =
         onClick={() => setIsZoomed(true)}
       >
         <Image
-          src={src}
+          src={currentSrc}
           alt={alt}
           fill
           sizes={sizes}
           className={`object-cover transition-all duration-500 ${className || ""} group-hover/image:scale-105 group-hover/image:brightness-90`}
-          onError={() => setHasError(true)}
+          onError={() => {
+            if (fallbackSrc && currentSrc !== fallbackSrc) {
+              setCurrentSrc(fallbackSrc);
+            } else {
+              setHasError(true);
+            }
+          }}
           placeholder="blur"
           blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2YzZjRmNiIvPjwvc3ZnPg=="
           loading={priority ? undefined : "lazy"}

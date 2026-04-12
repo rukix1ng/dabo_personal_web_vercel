@@ -118,6 +118,7 @@ export default async function AchievementsPage({ params }: PageProps) {
                   <div className="relative aspect-video w-full shrink-0 overflow-hidden bg-muted sm:w-64 lg:w-72 sm:aspect-square lg:aspect-[4/3]">
                     <MediaImage
                       src={item.image_en || item.image || ''}
+                      fallbackSrc={item.image_en ? item.image || undefined : undefined}
                       alt={title}
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 512px, 600px"
                       className="transition-transform duration-500 group-hover:scale-105"
