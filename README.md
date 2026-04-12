@@ -1,82 +1,57 @@
-# 部署到阿里云服务器
+# Dabo Personal Web
 
-本项目已配置好自动化部署脚本，可以快速部署到阿里云服务器。
+这是一个基于 Next.js 的多语言站点项目，当前以 Vercel 部署为主。
 
-## 快速开始
+## 本地开发
 
-### 1. 上传项目
-```bash
-scp -r /path/to/dabo_personal user@47.110.87.81:/var/www/
-```
-
-### 2. 执行部署
-```bash
-ssh user@47.110.87.81
-cd /var/www/dabo_personal
-chmod +x deploy.sh
-./deploy.sh --setup
-```
-
-### 3. 访问网站
-- Next.js: `http://47.110.87.81:3000`
-- Nginx: `http://47.110.87.81`
-
-## 文档
-
-- 📖 [快速部署指南](QUICK_START.md) - 最简洁的部署步骤
-- 📚 [完整部署文档](DEPLOYMENT.md) - 详细的部署说明和故障排查
-
-## 部署文件
-
-- `deploy.sh` - 自动化部署脚本
-- `ecosystem.config.js` - PM2 进程管理配置
-- `nginx.conf` - Nginx 反向代理配置（可选）
-- `.env.production` - 生产环境变量模板
-
-## 维护命令
+先安装依赖并启动开发服务器：
 
 ```bash
-pm2 status              # 查看状态
-pm2 logs dabo-personal  # 查看日志
-pm2 restart dabo-personal  # 重启应用
-./deploy.sh --update    # 更新部署
+npm install
+npm run dev
 ```
 
----
+浏览器访问 [http://localhost:3000](http://localhost:3000)。
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
-
-## Getting Started
-
-First, run the development server:
+## 常用命令
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run build
+npm run lint
+npm run build:local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 数据库
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+项目仍然保留远程 MySQL 数据库连接能力，数据库配置来自环境变量：
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+DB_HOST
+DB_PORT
+DB_USER
+DB_PASSWORD
+DB_NAME
+```
 
-## Learn More
+数据库初始化脚本位于 `scripts/init-db.sh`。
 
-To learn more about Next.js, take a look at the following resources:
+## 部署
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+推荐直接连接 GitHub 仓库并通过 Vercel 部署。
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+如果需要配置生产站点 URL，可在环境变量中设置：
 
-## Deploy on Vercel
+```bash
+NEXT_PUBLIC_BASE_URL
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+未设置时，应用会优先使用 Vercel 提供的生产域名。
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 技术栈
+
+- Next.js
+- React
+- TypeScript
+- MySQL
+- Vercel

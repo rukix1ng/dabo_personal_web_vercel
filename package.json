@@ -7,9 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "build:local": "bash scripts/build-local.sh",
-    "deploy:build": "bash scripts/deploy-build.sh",
-    "deploy:full": "bash scripts/deploy-full.sh"
+    "build:local": "bash scripts/build-local.sh"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

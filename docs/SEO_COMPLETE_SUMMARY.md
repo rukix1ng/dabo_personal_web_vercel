@@ -237,10 +237,10 @@ http://localhost:3000/opengraph-image
 ### 2. 部署到生产环境
 
 ```bash
-# 使用你的部署脚本
-npm run deploy:full
-# 或
-npm run deploy:build
+# 推送到连接的 GitHub 仓库
+git push
+
+# 然后等待 Vercel 自动部署
 ```
 
 ### 3. 部署后验证

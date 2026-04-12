@@ -1,9 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  // Enable static optimization for better SEO
-  output: 'standalone',
   // Optimize images for SEO
   images: {
     // Disable AVIF to save CPU (it's very expensive to compress)
