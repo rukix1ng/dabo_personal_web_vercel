@@ -56,7 +56,7 @@ export async function PUT(
             content_en, content_zh, content_ja,
             journal_name_en, journal_name_zh, journal_name_ja,
             author_bio_en, author_bio_zh, author_bio_ja,
-            publish_date, series_number, image
+            publish_date, series_number, image, image_en
         } = body;
 
         await query(
@@ -66,7 +66,7 @@ export async function PUT(
                 content_en = ?, content_zh = ?, content_ja = ?,
                 journal_name_en = ?, journal_name_zh = ?, journal_name_ja = ?,
                 author_bio_en = ?, author_bio_zh = ?, author_bio_ja = ?,
-                publish_date = ?, series_number = ?, image = ?
+                publish_date = ?, series_number = ?, image = ?, image_en = ?
             WHERE id = ?`,
             [
                 title_en, title_zh, title_ja,
@@ -74,7 +74,7 @@ export async function PUT(
                 content_en || null, content_zh || null, content_ja || null,
                 journal_name_en, journal_name_zh, journal_name_ja,
                 author_bio_en || null, author_bio_zh || null, author_bio_ja || null,
-                publish_date || null, series_number, image || null,
+                publish_date || null, series_number, image || null, image_en || null,
                 id
             ]
         );

@@ -20,7 +20,7 @@ export async function GET() {
                     content_en, content_zh, content_ja,
                     journal_name_en, journal_name_zh, journal_name_ja,
                     author_bio_en, author_bio_zh, author_bio_ja,
-                    publish_date, series_number, image, created_at, updated_at
+                    publish_date, series_number, image, image_en, created_at, updated_at
              FROM news_column
              ORDER BY series_number DESC, publish_date DESC, id DESC`
         );
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
             content_en, content_zh, content_ja,
             journal_name_en, journal_name_zh, journal_name_ja,
             author_bio_en, author_bio_zh, author_bio_ja,
-            publish_date, series_number, image
+            publish_date, series_number, image, image_en
         } = body;
 
         // Validate required fields
@@ -68,15 +68,15 @@ export async function POST(request: NextRequest) {
                 content_en, content_zh, content_ja,
                 journal_name_en, journal_name_zh, journal_name_ja,
                 author_bio_en, author_bio_zh, author_bio_ja,
-                publish_date, series_number, image
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                publish_date, series_number, image, image_en
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 title_en, title_zh, title_ja,
                 display_title_en || null, display_title_zh || null, display_title_ja || null,
                 content_en || null, content_zh || null, content_ja || null,
                 journal_name_en || null, journal_name_zh || null, journal_name_ja || null,
                 author_bio_en || null, author_bio_zh || null, author_bio_ja || null,
-                publish_date || null, series_number, image || null
+                publish_date || null, series_number, image || null, image_en || null
             ]
         );
 

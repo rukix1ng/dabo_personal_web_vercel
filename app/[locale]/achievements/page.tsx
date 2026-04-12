@@ -53,6 +53,7 @@ interface NewsColumn {
   publish_date: string | Date | null;
   series_number: number;
   image: string | null;
+  image_en: string | null;
 }
 
 async function getNewsColumns(): Promise<NewsColumn[]> {
@@ -62,7 +63,7 @@ async function getNewsColumns(): Promise<NewsColumn[]> {
               content_en, content_zh, content_ja,
               journal_name_en, journal_name_zh, journal_name_ja,
               author_bio_en, author_bio_zh, author_bio_ja,
-              publish_date, series_number, image
+              publish_date, series_number, image, image_en
        FROM news_column
        ORDER BY series_number DESC, id DESC`
     );
@@ -116,7 +117,7 @@ export default async function AchievementsPage({ params }: PageProps) {
                   {/* Image Container */}
                   <div className="relative aspect-video w-full shrink-0 overflow-hidden bg-muted sm:w-64 lg:w-72 sm:aspect-square lg:aspect-[4/3]">
                     <MediaImage
-                      src={item.image || ''}
+                      src={item.image_en || item.image || ''}
                       alt={title}
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 512px, 600px"
                       className="transition-transform duration-500 group-hover:scale-105"

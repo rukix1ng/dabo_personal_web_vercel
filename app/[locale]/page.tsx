@@ -128,7 +128,7 @@ async function getHomepageProjectNews(locale: Locale): Promise<{
          LIMIT 3`
       ),
       query<NewsColumnRecord>(
-        `SELECT id, title_en, title_zh, title_ja, display_title_en, display_title_zh, display_title_ja, image, publish_date
+        `SELECT id, title_en, title_zh, title_ja, display_title_en, display_title_zh, display_title_ja, image, image_en, publish_date
          FROM news_column
          ORDER BY series_number DESC, id DESC
          LIMIT 3`
@@ -188,7 +188,7 @@ async function getHomepageProjectNews(locale: Locale): Promise<{
       "news-column",
       newsColumns,
       (row) => formatDateValue(row.publish_date),
-      (row) => row.image || "",
+      (row) => row.image_en || row.image || "",
       (row) => `/${locale}/achievements/${row.id}`
     );
     pushGroupItems(

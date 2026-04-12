@@ -26,6 +26,7 @@ interface NewsColumn {
     publish_date: string;
     series_number: number;
     image: string | null;
+    image_en: string | null;
     created_at: string;
     updated_at: string;
 }
@@ -49,6 +50,7 @@ interface NewsColumnFormData {
     publish_date: string;
     series_number: string;
     image: string;
+    image_en: string;
 }
 
 export default function NewsColumnsManagementPage() {
@@ -87,6 +89,7 @@ export default function NewsColumnsManagementPage() {
         publish_date: "",
         series_number: "",
         image: "",
+        image_en: "",
     });
 
     // Fetch news columns
@@ -251,6 +254,7 @@ export default function NewsColumnsManagementPage() {
             publish_date: publishDateValue,
             series_number: newsColumn.series_number.toString(),
             image: newsColumn.image || "",
+            image_en: newsColumn.image_en || "",
         });
         setShowForm(true);
     };
@@ -276,6 +280,7 @@ export default function NewsColumnsManagementPage() {
             publish_date: "",
             series_number: "",
             image: "",
+            image_en: "",
         });
         setEditingId(null);
         setShowForm(false);
@@ -841,6 +846,17 @@ export default function NewsColumnsManagementPage() {
                                 <ImageUpload
                                     value={formData.image}
                                     onChange={(url) => setFormData({ ...formData, image: url })}
+                                    onUploaded={({ url, url_en }) =>
+                                        setFormData((prev) => ({
+                                            ...prev,
+                                            image: url,
+                                            image_en: url_en || prev.image_en,
+                                        }))
+                                    }
+                                    extraUrls={[
+                                        { label: "国内七牛云", value: formData.image },
+                                        { label: "国外 Supabase", value: formData.image_en },
+                                    ]}
                                     folder="news-columns"
                                     label="图片"
                                 />

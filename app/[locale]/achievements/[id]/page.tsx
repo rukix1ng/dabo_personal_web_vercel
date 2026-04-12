@@ -32,6 +32,7 @@ interface NewsColumn {
   publish_date: string | Date | null;
   series_number: number;
   image: string | null;
+  image_en: string | null;
 }
 
 async function getNewsColumn(id: string): Promise<NewsColumn | null> {
@@ -41,7 +42,7 @@ async function getNewsColumn(id: string): Promise<NewsColumn | null> {
               content_en, content_zh, content_ja,
               journal_name_en, journal_name_zh, journal_name_ja,
               author_bio_en, author_bio_zh, author_bio_ja,
-              publish_date, series_number, image
+              publish_date, series_number, image, image_en
        FROM news_column
        WHERE id = ?`,
       [parseInt(id)]
@@ -141,7 +142,7 @@ export default async function NewsColumnDetailPage({ params }: PageProps) {
     "@type": "NewsArticle",
     "headline": title,
     "description": contentText?.substring(0, 200) || title,
-    "image": item.image ? [item.image] : undefined,
+    "image": (item.image_en || item.image) ? [item.image_en || item.image] : undefined,
     "datePublished": formatStructuredDateTime(item.publish_date),
     "author": {
       "@type": "Organization",
@@ -209,9 +210,9 @@ export default async function NewsColumnDetailPage({ params }: PageProps) {
       </div>
 
       {/* Image */}
-      {item.image && (
+      {(item.image_en || item.image) && (
         <ImagePreview
-          src={item.image}
+          src={item.image_en || item.image || ''}
           alt={title}
           className="w-full h-auto rounded-lg"
         />
