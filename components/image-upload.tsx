@@ -115,14 +115,11 @@ export function ImageUpload({
                     >
                         <X className="h-4 w-4" />
                     </button>
-                    <div className="mt-2 text-xs text-muted-foreground truncate">
-                        {value}
-                    </div>
                     {extraUrls
                         .filter((item) => item.value)
                         .map((item) => (
                             <div key={item.label} className="mt-1 text-xs text-muted-foreground break-all">
-                                <span className="font-medium text-foreground">{item.label}：</span>
+                                <span className="font-medium">{item.label}：</span>
                                 {item.value}
                             </div>
                         ))}
@@ -180,7 +177,7 @@ export function ImageUpload({
                         .filter((item) => item.value)
                         .map((item) => (
                             <div key={item.label} className="text-xs text-muted-foreground break-all">
-                                <span className="font-medium text-foreground">{item.label}：</span>
+                                <span className="font-medium">{item.label}：</span>
                                 {item.value}
                             </div>
                         ))}
