@@ -60,6 +60,7 @@ type NewsColumnRecord = {
   display_title_zh: string | null;
   display_title_ja: string | null;
   image: string | null;
+  image_en: string | null;
   publish_date: string | Date | null;
 };
 
