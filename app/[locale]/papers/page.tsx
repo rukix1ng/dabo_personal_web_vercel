@@ -3,6 +3,7 @@ import { PapersPageClient } from "./papers-client";
 import { query } from "@/lib/db";
 import type { Metadata } from "next";
 import { extractYear } from "@/lib/date-time";
+import { getAbsoluteUrl } from "@/lib/site-url";
 
 // 启用增量静态再生成，5分钟缓存
 export const revalidate = 300;
@@ -114,13 +115,12 @@ export default async function PapersPage({ params }: PageProps) {
   const papers = await getPapers(locale);
 
   // Generate JSON-LD structured data
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://yourdomain.com';
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     name: t.papers.title,
     description: t.papers.description,
-    url: `${baseUrl}/${locale}/papers`,
+    url: getAbsoluteUrl(`/${locale}/papers`),
     mainEntity: {
       "@type": "ItemList",
       numberOfItems: papers.length,

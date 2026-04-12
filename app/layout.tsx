@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { cookies } from "next/headers";
+import { getSiteUrl, getSiteUrlObject } from "@/lib/site-url";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -18,7 +19,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'),
+  metadataBase: getSiteUrlObject(),
   title: {
     default: "Industry-Academia Exchange Platform for Semiconductor Equipment Materials",
     template: "%s",
@@ -84,7 +85,7 @@ export default async function RootLayout({
   const cookieStore = await cookies();
   const locale = cookieStore.get("locale")?.value ?? "en";
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  const baseUrl = getSiteUrl();
 
   // WebSite structured data
   const websiteJsonLd = {

@@ -4,6 +4,7 @@ import { FormattedText } from "@/components/formatted-text";
 import type { Metadata } from "next";
 import { query } from "@/lib/db";
 import { formatStructuredDateTime } from "@/lib/date-time";
+import { getAbsoluteUrl } from "@/lib/site-url";
 
 // 启用增量静态再生成，5分钟缓存
 export const revalidate = 300;
@@ -87,13 +88,12 @@ export default async function ForumPage({ params }: PageProps) {
   const invitations = await getInvitations();
 
   // Generate JSON-LD structured data
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://yourdomain.com';
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     name: t.forum.title,
     description: `${t.forum.title} - ${t.meta.description}`,
-    url: `${baseUrl}/${locale}/forum`,
+    url: getAbsoluteUrl(`/${locale}/forum`),
     mainEntity: {
       "@type": "ItemList",
       numberOfItems: invitations.length,
@@ -109,7 +109,7 @@ export default async function ForumPage({ params }: PageProps) {
             "@type": "Person",
             name: locale === 'zh' ? invitation.speaker_zh : locale === 'ja' ? invitation.speaker_ja : invitation.speaker_en,
           },
-          url: `${baseUrl}/${locale}/forum/${invitation.id}`,
+          url: getAbsoluteUrl(`/${locale}/forum/${invitation.id}`),
         },
       })),
     },

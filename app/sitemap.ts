@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next';
 import { locales } from '@/lib/i18n';
 import { query } from '@/lib/db';
+import { getAbsoluteUrl } from '@/lib/site-url';
 
 // 启用ISR缓存：每24小时重新生成一次sitemap
 // 这是业界标准做法，因为：
@@ -42,8 +43,6 @@ async function getDynamicIds() {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://47.110.87.81';
-
   // Static pages
   const staticPages = [
     { path: '', changeFrequency: 'weekly' as const, priority: 1.0 },
@@ -62,13 +61,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Static pages
     for (const page of staticPages) {
       routes.push({
-        url: `${baseUrl}/${locale}${page.path}`,
+        url: getAbsoluteUrl(`/${locale}${page.path}`),
         lastModified: new Date(),
         changeFrequency: page.changeFrequency,
         priority: page.priority,
         alternates: {
           languages: Object.fromEntries(
-            locales.map((l) => [l, `${baseUrl}/${l}${page.path}`])
+            locales.map((l) => [l, getAbsoluteUrl(`/${l}${page.path}`)])
           ),
         },
       });
@@ -77,13 +76,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Forum detail pages (invitations)
     for (const invitation of invitations) {
       routes.push({
-        url: `${baseUrl}/${locale}/forum/${invitation.id}`,
+        url: getAbsoluteUrl(`/${locale}/forum/${invitation.id}`),
         lastModified: invitation.updated_at ? new Date(invitation.updated_at) : new Date(),
         changeFrequency: 'monthly',
         priority: 0.7,
         alternates: {
           languages: Object.fromEntries(
-            locales.map((l) => [l, `${baseUrl}/${l}/forum/${invitation.id}`])
+            locales.map((l) => [l, getAbsoluteUrl(`/${l}/forum/${invitation.id}`)])
           ),
         },
       });
@@ -92,13 +91,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Achievement detail pages (news columns)
     for (const newsColumn of newsColumns) {
       routes.push({
-        url: `${baseUrl}/${locale}/achievements/${newsColumn.id}`,
+        url: getAbsoluteUrl(`/${locale}/achievements/${newsColumn.id}`),
         lastModified: newsColumn.updated_at ? new Date(newsColumn.updated_at) : new Date(),
         changeFrequency: 'monthly',
         priority: 0.7,
         alternates: {
           languages: Object.fromEntries(
-            locales.map((l) => [l, `${baseUrl}/${l}/achievements/${newsColumn.id}`])
+            locales.map((l) => [l, getAbsoluteUrl(`/${l}/achievements/${newsColumn.id}`)])
           ),
         },
       });

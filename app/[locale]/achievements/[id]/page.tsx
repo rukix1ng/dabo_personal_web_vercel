@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { query } from "@/lib/db";
 import { ImagePreview } from "@/components/image-preview";
 import { formatStructuredDateTime, formatYearMonth } from "@/lib/date-time";
+import { getAbsoluteUrl, getSiteUrl } from "@/lib/site-url";
 
 type PageProps = {
   params: Promise<{ locale: Locale; id: string }>;
@@ -106,7 +107,7 @@ export default async function NewsColumnDetailPage({ params }: PageProps) {
   const authorBio = locale === 'zh' ? item.author_bio_zh : locale === 'ja' ? item.author_bio_ja : item.author_bio_en;
   const dateDisplay = formatPublishDate(item.publish_date, locale);
   // 生成结构化数据
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  const baseUrl = getSiteUrl();
 
   // BreadcrumbList 结构化数据
   const breadcrumbJsonLd = {
@@ -117,19 +118,19 @@ export default async function NewsColumnDetailPage({ params }: PageProps) {
         "@type": "ListItem",
         "position": 1,
         "name": t.navigation.home || "Home",
-        "item": `${baseUrl}/${locale}`,
+        "item": getAbsoluteUrl(`/${locale}`),
       },
       {
         "@type": "ListItem",
         "position": 2,
         "name": t.navigation.achievements,
-        "item": `${baseUrl}/${locale}/achievements`,
+        "item": getAbsoluteUrl(`/${locale}/achievements`),
       },
       {
         "@type": "ListItem",
         "position": 3,
         "name": title,
-        "item": `${baseUrl}/${locale}/achievements/${id}`,
+        "item": getAbsoluteUrl(`/${locale}/achievements/${id}`),
       },
     ],
   };
@@ -156,7 +157,7 @@ export default async function NewsColumnDetailPage({ params }: PageProps) {
     },
     "mainEntityOfPage": {
       "@type": "WebPage",
-      "@id": `${baseUrl}/${locale}/achievements/${id}`,
+      "@id": getAbsoluteUrl(`/${locale}/achievements/${id}`),
     },
   };
 
