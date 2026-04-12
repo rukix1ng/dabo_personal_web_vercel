@@ -3,6 +3,12 @@ import { getCurrentAdmin } from '@/lib/auth';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import qiniu from 'qiniu';
 
+type UploadOutcome = {
+    bucket: 'qiniu' | 'supabase';
+    url?: string;
+    error?: string;
+};
+
 // POST /api/upload/image - Upload image to Qiniu
 export async function POST(request: NextRequest) {
     try {
@@ -56,17 +62,16 @@ export async function POST(request: NextRequest) {
         const supabaseSecretKey = process.env.SUPABASE_S3_SECRET_KEY;
         const supabaseRegion = process.env.SUPABASE_S3_REGION || 'us-east-1';
 
-        if (
-            !accessKey ||
-            !secretKey ||
-            !bucket ||
-            !domain ||
-            !supabaseEndpoint ||
-            !supabaseBucket ||
-            !supabaseAccessKey ||
-            !supabaseSecretKey
-        ) {
-            console.error('Storage credentials not fully configured');
+        const qiniuConfigured = Boolean(accessKey && secretKey && bucket && domain);
+        const supabaseConfigured = Boolean(
+            supabaseEndpoint &&
+            supabaseBucket &&
+            supabaseAccessKey &&
+            supabaseSecretKey
+        );
+
+        if (!qiniuConfigured && !supabaseConfigured) {
+            console.error('No storage provider configured');
             return NextResponse.json(
                 { error: 'Storage service not configured' },
                 { status: 500 }
@@ -79,89 +84,133 @@ export async function POST(request: NextRequest) {
         const ext = file.name.split('.').pop();
         const key = `${folder}/${timestamp}-${randomStr}.${ext}`;
 
-        // Create Qiniu upload token
-        const mac = new qiniu.auth.digest.Mac(accessKey, secretKey);
-        const options = {
-            scope: bucket,
-            expires: 3600, // 1 hour
-        };
-        const putPolicy = new qiniu.rs.PutPolicy(options);
-        const uploadToken = putPolicy.uploadToken(mac);
-
         // Convert File to Buffer
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
-        // Upload to Qiniu
-        // Let the Qiniu SDK resolve the bucket region automatically.
-        const config = new qiniu.conf.Config();
-        const formUploader = new qiniu.form_up.FormUploader(config);
-        const putExtra = new qiniu.form_up.PutExtra();
+        const uploadTasks: Promise<UploadOutcome>[] = [];
 
-        // Upload using promise
-        const uploadPromise = new Promise<string>((resolve, reject) => {
-            formUploader.put(
-                uploadToken,
-                key,
-                buffer,
-                putExtra,
-                (err, body, info) => {
-                    if (err) {
-                        console.error('Qiniu upload error:', err);
-                        reject(err);
-                        return;
+        if (qiniuConfigured) {
+            uploadTasks.push(
+                (async () => {
+                    try {
+                        const mac = new qiniu.auth.digest.Mac(accessKey!, secretKey!);
+                        const options = {
+                            scope: bucket!,
+                            expires: 3600,
+                        };
+                        const putPolicy = new qiniu.rs.PutPolicy(options);
+                        const uploadToken = putPolicy.uploadToken(mac);
+                        const config = new qiniu.conf.Config();
+                        const formUploader = new qiniu.form_up.FormUploader(config);
+                        const putExtra = new qiniu.form_up.PutExtra();
+
+                        const uploadedKey = await new Promise<string>((resolve, reject) => {
+                            formUploader.put(uploadToken, key, buffer, putExtra, (err, body, info) => {
+                                if (err) {
+                                    reject(err);
+                                    return;
+                                }
+
+                                if (info.statusCode === 200) {
+                                    resolve(body.key);
+                                    return;
+                                }
+
+                                const bodyMessage =
+                                    body && typeof body === 'object' && 'error' in body
+                                        ? String(body.error)
+                                        : '';
+                                const detail = bodyMessage || JSON.stringify(info);
+                                reject(new Error(`Upload failed with status ${info.statusCode}: ${detail}`));
+                            });
+                        });
+
+                        const normalizedDomain = domain!.replace(/\/$/, '');
+                        return {
+                            bucket: 'qiniu' as const,
+                            url: `${normalizedDomain}/${uploadedKey}`,
+                        };
+                    } catch (error) {
+                        return {
+                            bucket: 'qiniu' as const,
+                            error: error instanceof Error ? error.message : 'Unknown Qiniu upload error',
+                        };
                     }
-                    if (info.statusCode === 200) {
-                        console.log('Upload successful, key:', body.key);
-                        resolve(body.key);
-                    } else {
-                        console.error('Qiniu upload failed:', { info, body });
-                        const bodyMessage =
-                            body && typeof body === 'object' && 'error' in body
-                                ? String(body.error)
-                                : '';
-                        const detail = bodyMessage || JSON.stringify(info);
-                        reject(new Error(`Upload failed with status ${info.statusCode}: ${detail}`));
-                    }
-                }
+                })()
             );
-        });
+        }
 
-        const uploadedKey = await uploadPromise;
-        const normalizedDomain = domain.replace(/\/$/, '');
-        const cnUrl = `${normalizedDomain}/${uploadedKey}`;
+        if (supabaseConfigured) {
+            uploadTasks.push(
+                (async () => {
+                    try {
+                        const supabaseClient = new S3Client({
+                            region: supabaseRegion,
+                            endpoint: supabaseEndpoint,
+                            forcePathStyle: true,
+                            credentials: {
+                                accessKeyId: supabaseAccessKey!,
+                                secretAccessKey: supabaseSecretKey!,
+                            },
+                        });
 
-        const supabaseClient = new S3Client({
-            region: supabaseRegion,
-            endpoint: supabaseEndpoint,
-            forcePathStyle: true,
-            credentials: {
-                accessKeyId: supabaseAccessKey,
-                secretAccessKey: supabaseSecretKey,
-            },
-        });
+                        await supabaseClient.send(
+                            new PutObjectCommand({
+                                Bucket: supabaseBucket,
+                                Key: key,
+                                Body: buffer,
+                                ContentType: file.type,
+                                CacheControl: 'public, max-age=31536000, immutable',
+                            })
+                        );
 
-        await supabaseClient.send(
-            new PutObjectCommand({
-                Bucket: supabaseBucket,
-                Key: key,
-                Body: buffer,
-                ContentType: file.type,
-                CacheControl: 'public, max-age=31536000, immutable',
-            })
-        );
+                        const endpointUrl = new URL(supabaseEndpoint!);
+                        const publicHost = endpointUrl.hostname.replace('.storage.supabase.co', '.supabase.co');
+                        return {
+                            bucket: 'supabase' as const,
+                            url: `${endpointUrl.protocol}//${publicHost}/storage/v1/object/public/${supabaseBucket}/${key}`,
+                        };
+                    } catch (error) {
+                        return {
+                            bucket: 'supabase' as const,
+                            error: error instanceof Error ? error.message : 'Unknown Supabase upload error',
+                        };
+                    }
+                })()
+            );
+        }
 
-        const supabaseUrl = new URL(supabaseEndpoint);
-        const publicHost = supabaseUrl.hostname.replace('.storage.supabase.co', '.supabase.co');
-        const enUrl = `${supabaseUrl.protocol}//${publicHost}/storage/v1/object/public/${supabaseBucket}/${uploadedKey}`;
-        console.log('Upload successful', { cnUrl, enUrl });
+        const outcomes = await Promise.all(uploadTasks);
+        const qiniuResult = outcomes.find((item) => item.bucket === 'qiniu');
+        const supabaseResult = outcomes.find((item) => item.bucket === 'supabase');
+        const cnUrl = qiniuResult?.url;
+        const enUrl = supabaseResult?.url;
+        const warnings = outcomes
+            .filter((item) => item.error)
+            .map((item) =>
+                item.bucket === 'qiniu'
+                    ? `七牛上传失败：${item.error}`
+                    : `Supabase 上传失败：${item.error}`
+            );
+
+        if (!cnUrl && !enUrl) {
+            console.error('All uploads failed', outcomes);
+            return NextResponse.json(
+                { error: warnings.join('；') || 'All uploads failed' },
+                { status: 500 }
+            );
+        }
+
+        console.log('Upload completed', { cnUrl, enUrl, warnings });
 
         return NextResponse.json({
             success: true,
-            url: cnUrl,
+            url: cnUrl || enUrl || '',
             url_en: enUrl,
             filename: file.name,
             size: file.size,
+            warnings,
         });
     } catch (error) {
         console.error('Error uploading image:', error);

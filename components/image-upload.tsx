@@ -7,7 +7,7 @@ import Image from "next/image";
 interface ImageUploadProps {
     value: string;
     onChange: (url: string) => void;
-    onUploaded?: (result: { url: string; url_en?: string }) => void;
+    onUploaded?: (result: { url: string; url_en?: string; warnings?: string[] }) => void;
     folder?: string;
     label?: string;
     required?: boolean;
@@ -23,6 +23,7 @@ export function ImageUpload({
 }: ImageUploadProps) {
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState("");
+    const [warning, setWarning] = useState("");
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -64,9 +65,11 @@ export function ImageUpload({
             const data = await res.json();
             onChange(data.url);
             onUploaded?.(data);
+            setWarning(Array.isArray(data.warnings) ? data.warnings.join("；") : "");
         } catch (err) {
             console.error("Upload error:", err);
             setError(err instanceof Error ? err.message : "上传失败，请重试");
+            setWarning("");
         } finally {
             setUploading(false);
             // Reset file input
@@ -79,6 +82,7 @@ export function ImageUpload({
     const handleRemove = () => {
         onChange("");
         setError("");
+        setWarning("");
     };
 
     const handleClick = () => {
@@ -147,6 +151,10 @@ export function ImageUpload({
 
             {error && (
                 <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+            )}
+
+            {!error && warning && (
+                <p className="text-sm text-amber-600 dark:text-amber-400">{warning}</p>
             )}
 
             {!value && (
