@@ -48,8 +48,13 @@ export function Navbar({ locale }: NavbarProps) {
                 priority
               />
             </span>
-            <span className="line-clamp-2 text-sm font-bold leading-tight tracking-tight sm:text-lg lg:text-xl">
-              {t.hero.name}
+            <span className="min-w-0">
+              <span className="block line-clamp-2 text-xs font-bold leading-tight sm:text-sm lg:text-base">
+                {t.hero.name}
+              </span>
+              <span className="mt-0.5 block line-clamp-1 text-[10px] font-medium leading-tight text-muted-foreground sm:text-xs lg:text-sm">
+                {t.hero.title}
+              </span>
             </span>
           </Link>
         </div>

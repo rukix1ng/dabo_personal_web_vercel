@@ -29,8 +29,8 @@ export const content = {
       ],
     },
     hero: {
-      name: "Industry-Academia Exchange Platform for Semiconductor Equipment Materials",
-      title: "A Collaborative Project of NIMS and Lam Research",
+      name: "High-Performance Materials for Semiconductor Manufacturing Systems",
+      title: "A collaborative research project between Lam Research and NIMS",
       description: "This project is based on a strategic donation and collaboration from Lam Research Corporation (Fremont, U.S.A.) to the National Institute for Materials Science (NIMS, Tsukuba, Japan). NIMS Principal Researcher Dr. Da Bo serves as the project leader and donation recipient."
     },
     info: {
@@ -263,8 +263,8 @@ export const content = {
       ],
     },
     hero: {
-      name: "半导体装备材料产学交流平台",
-      title: "NIMS-泛林集团合作项目",
+      name: "面向半导体制造系统的高性能材料研究项目",
+      title: "Lam Research 与 NIMS 联合研究项目",
       description: "本项目基于泛林集团（Lam Research Corporation, Fremont, U.S.A.）向日本国立材料研究所（NIMS, Tsukuba, Japan）提供的战略性捐赠及相关合作开展，日本国立材料研究所达博主任研究员为项目负责人及捐赠接收方。"
     },
     info: {
@@ -497,8 +497,8 @@ export const content = {
       ],
     },
     hero: {
-      name: "半導体装置材料産学交流プラットフォーム",
-      title: "NIMS・ラムリサーチ共同プロジェクト",
+      name: "半導体製造システム向け高性能材料研究プロジェクト",
+      title: "Lam Research と NIMS の共同研究プロジェクト",
       description: "本プロジェクトは、Lam Research Corporation（米国フリーモント）から国立研究開発法人物質・材料研究機構（NIMS、日本つくば）への戦略的寄付および関連協力に基づいて実施されています。NIMS主任研究員の達博博士がプロジェクトリーダーおよび寄付受領者を務めています。"
     },
     info: {
