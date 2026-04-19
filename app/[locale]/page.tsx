@@ -1,4 +1,4 @@
-import { content, type Locale, locales } from "@/lib/i18n";
+import { content, type Locale, publicLocales } from "@/lib/i18n";
 import { FormattedText } from "@/components/formatted-text";
 import { ProjectNews } from "@/components/project-news";
 import { query } from "@/lib/db";
@@ -11,7 +11,7 @@ type PageProps = {
 };
 
 export async function generateStaticParams() {
-  return locales.map((locale) => ({ locale }));
+  return publicLocales.map((locale) => ({ locale }));
 }
 
 export const revalidate = 300;
@@ -29,7 +29,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       canonical: `/${locale}`,
       languages: {
         en: "/en",
-        zh: "/zh",
         ja: "/ja",
       },
     },

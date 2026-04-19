@@ -1,4 +1,4 @@
-import { content, type Locale, locales } from "@/lib/i18n";
+import { content, type Locale, publicLocales } from "@/lib/i18n";
 import { PapersPageClient } from "./papers-client";
 import { query } from "@/lib/db";
 import type { Metadata } from "next";
@@ -13,7 +13,7 @@ type PageProps = {
 };
 
 export async function generateStaticParams() {
-  return locales.map((locale) => ({ locale }));
+  return publicLocales.map((locale) => ({ locale }));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -29,7 +29,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       canonical: `/${locale}/papers`,
       languages: {
         en: "/en/papers",
-        zh: "/zh/papers",
         ja: "/ja/papers",
       },
     },

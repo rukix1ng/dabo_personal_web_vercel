@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { content, locales, type Locale } from "@/lib/i18n";
+import { content, publicLocales, type Locale } from "@/lib/i18n";
 import { Navbar } from "@/components/navbar";
 
 const ogLocales: Record<Locale, string> = {
@@ -9,7 +9,7 @@ const ogLocales: Record<Locale, string> = {
 };
 
 export function generateStaticParams() {
-  return locales.map((locale) => ({ locale }));
+  return publicLocales.map((locale) => ({ locale }));
 }
 
 export async function generateMetadata({
@@ -29,7 +29,6 @@ export async function generateMetadata({
       canonical: `/${locale}`,
       languages: {
         en: "/en",
-        zh: "/zh",
         ja: "/ja",
       },
     },

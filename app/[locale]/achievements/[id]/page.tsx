@@ -87,7 +87,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       canonical: `/${locale}/achievements/${id}`,
       languages: {
         en: `/en/achievements/${id}`,
-        zh: `/zh/achievements/${id}`,
         ja: `/ja/achievements/${id}`,
       },
     },

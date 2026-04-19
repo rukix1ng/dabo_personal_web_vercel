@@ -99,7 +99,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       canonical: `/${locale}/forum/${id}`,
       languages: {
         en: `/en/forum/${id}`,
-        zh: `/zh/forum/${id}`,
         ja: `/ja/forum/${id}`,
       },
     },

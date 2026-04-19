@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronDown, Globe } from "lucide-react";
-import { localeLabels, locales, type Locale } from "@/lib/i18n";
+import { localeLabels, publicLocales, type Locale } from "@/lib/i18n";
 
 interface LanguageSwitcherProps {
   currentLocale: Locale;
@@ -53,7 +53,7 @@ export function LanguageSwitcher({ currentLocale }: LanguageSwitcherProps) {
       {isOpen && (
         <div className="absolute right-0 top-full z-50 mt-2 w-36 overflow-hidden rounded-lg border border-border/50 bg-card shadow-xl backdrop-blur-sm">
           <div className="p-1.5">
-            {locales.map((locale) => {
+            {publicLocales.map((locale) => {
               const newHref = `/${locale}${currentPath}`;
               const isActive = locale === currentLocale;
               return (

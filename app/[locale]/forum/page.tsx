@@ -1,4 +1,4 @@
-import { content, type Locale, locales } from "@/lib/i18n";
+import { content, type Locale, publicLocales } from "@/lib/i18n";
 import { InvitationCard } from "@/components/invitation-card";
 import { FormattedText } from "@/components/formatted-text";
 import type { Metadata } from "next";
@@ -15,7 +15,7 @@ type PageProps = {
 };
 
 export async function generateStaticParams() {
-  return locales.map((locale) => ({ locale }));
+  return publicLocales.map((locale) => ({ locale }));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -31,7 +31,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       canonical: `/${locale}/forum`,
       languages: {
         en: "/en/forum",
-        zh: "/zh/forum",
         ja: "/ja/forum",
       },
     },

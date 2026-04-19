@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { defaultLocale, locales, type Locale } from "./lib/i18n";
+import { defaultLocale, locales, publicLocales, type Locale } from "./lib/i18n";
 
 const PUBLIC_FILE = /\.(.*)$/;
 
@@ -17,7 +17,7 @@ function getBrowserLocale(request: NextRequest): Locale {
     .sort((a, b) => b.quality - a.quality);
 
   for (const { locale } of languages) {
-    if (locale === "zh" || locale === "ja" || locale === "en") {
+    if (locale === "ja" || locale === "en") {
       return locale as Locale;
     }
   }
@@ -27,6 +27,7 @@ function getBrowserLocale(request: NextRequest): Locale {
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const zhPathMatch = pathname.match(/^\/zh(\/.*)?$/);
 
   // Check if it's a language path with /admin
   const localeRegex = new RegExp(`^/(${locales.join('|')})/admin`);
@@ -53,14 +54,22 @@ export function middleware(request: NextRequest) {
     return response;
   }
 
-  const hasLocale = locales.some(
+  if (zhPathMatch) {
+    const url = request.nextUrl.clone();
+    url.pathname = `/en${zhPathMatch[1] ?? ""}`;
+    return NextResponse.redirect(url);
+  }
+
+  const hasLocale = publicLocales.some(
     (locale) => pathname === `/${locale}` || pathname.startsWith(`/${locale}/`)
   );
 
   if (!hasLocale) {
     const cookieLocale = request.cookies.get("locale")?.value as Locale | undefined;
     const browserLocale = cookieLocale || getBrowserLocale(request);
-    const locale = locales.includes(browserLocale) ? browserLocale : defaultLocale;
+    const locale = publicLocales.includes(browserLocale as (typeof publicLocales)[number])
+      ? browserLocale
+      : defaultLocale;
 
     const url = request.nextUrl.clone();
     url.pathname = `/${locale}${pathname}`;

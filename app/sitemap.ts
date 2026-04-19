@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next';
-import { locales } from '@/lib/i18n';
+import { publicLocales } from '@/lib/i18n';
 import { query } from '@/lib/db';
 import { getAbsoluteUrl } from '@/lib/site-url';
 
@@ -57,7 +57,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const routes: MetadataRoute.Sitemap = [];
 
   // Generate routes for each locale
-  for (const locale of locales) {
+  for (const locale of publicLocales) {
     // Static pages
     for (const page of staticPages) {
       routes.push({
@@ -67,7 +67,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: page.priority,
         alternates: {
           languages: Object.fromEntries(
-            locales.map((l) => [l, getAbsoluteUrl(`/${l}${page.path}`)])
+            publicLocales.map((l) => [l, getAbsoluteUrl(`/${l}${page.path}`)])
           ),
         },
       });
@@ -82,7 +82,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.7,
         alternates: {
           languages: Object.fromEntries(
-            locales.map((l) => [l, getAbsoluteUrl(`/${l}/forum/${invitation.id}`)])
+            publicLocales.map((l) => [l, getAbsoluteUrl(`/${l}/forum/${invitation.id}`)])
           ),
         },
       });
@@ -97,7 +97,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.7,
         alternates: {
           languages: Object.fromEntries(
-            locales.map((l) => [l, getAbsoluteUrl(`/${l}/achievements/${newsColumn.id}`)])
+            publicLocales.map((l) => [l, getAbsoluteUrl(`/${l}/achievements/${newsColumn.id}`)])
           ),
         },
       });
