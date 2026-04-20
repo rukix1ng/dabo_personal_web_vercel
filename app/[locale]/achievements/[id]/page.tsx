@@ -234,9 +234,9 @@ export default async function NewsColumnDetailPage({ params }: PageProps) {
               );
             }
 
-            // 普通段落：首行缩进
+            // 普通段落：两端对齐
             return (
-              <p key={index} className="text-base leading-relaxed text-foreground indent-8">
+              <p key={index} className="text-base leading-relaxed text-foreground text-justify">
                 {paragraph}
               </p>
             );

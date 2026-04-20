@@ -292,7 +292,7 @@ export default async function InvitationDetailPage({ params }: PageProps) {
           <h2 className="text-2xl font-bold text-foreground">{t.common.abstract}</h2>
           <div className="prose prose-neutral dark:prose-invert max-w-none">
             {abstract.split('\n').filter(para => para.trim()).map((paragraph, index) => (
-              <p key={index} className="text-base leading-relaxed text-foreground indent-8 mb-4 last:mb-0">
+              <p key={index} className="text-base leading-relaxed text-foreground text-justify mb-4 last:mb-0">
                 {paragraph}
               </p>
             ))}
