@@ -163,6 +163,10 @@ export async function POST(request: NextRequest) {
     if (validationError) {
       return NextResponse.json({ error: validationError }, { status: 400 });
     }
+    const newsDate = body.news_date?.trim();
+    if (!newsDate) {
+      return NextResponse.json({ error: "News date is required" }, { status: 400 });
+    }
 
     if (body.show_in_featured) {
       const featuredCount = await getFeaturedCount();
@@ -183,7 +187,7 @@ export async function POST(request: NextRequest) {
         body.title_ja?.trim(),
         body.link_type,
         body.link_value?.trim() || null,
-        body.news_date.trim(),
+        newsDate,
         body.image?.trim() || null,
         Boolean(body.show_in_featured),
       ]
