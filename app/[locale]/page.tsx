@@ -64,6 +64,8 @@ type HomepageListItem = {
   external?: boolean;
 };
 
+const HOMEPAGE_NEWS_PAGE_SIZE = 10;
+
 function pickLocalizedTitle(
   locale: Locale,
   record: {
@@ -90,6 +92,7 @@ function formatDateValue(value: string | Date | null) {
 async function getHomepageProjectNews(locale: Locale): Promise<{
   featured: HomepageFeaturedItem[];
   list: HomepageListItem[];
+  listTotalCount: number;
 }> {
   try {
     const tableRows = await query<{ table_name: string }>(
@@ -100,10 +103,10 @@ async function getHomepageProjectNews(locale: Locale): Promise<{
     );
 
     if (tableRows.length === 0) {
-      return { featured: [], list: [] };
+      return { featured: [], list: [], listTotalCount: 0 };
     }
 
-    const [featuredRows, listRows] = await Promise.all([
+    const [featuredRows, listRows, listCountRows] = await Promise.all([
       query<NewsRecord>(
         `SELECT id, title_en, title_zh, title_ja, link_type, link_value, news_date, image, show_in_featured
          FROM news
@@ -115,7 +118,14 @@ async function getHomepageProjectNews(locale: Locale): Promise<{
         `SELECT id, title_en, title_zh, title_ja, link_type, link_value, news_date, image, show_in_featured
          FROM news
          WHERE show_in_featured = FALSE
-         ORDER BY news_date DESC, id DESC`
+         ORDER BY news_date DESC, id DESC
+         LIMIT ?`,
+        [HOMEPAGE_NEWS_PAGE_SIZE]
+      ),
+      query<{ count: number }>(
+        `SELECT COUNT(*) AS count
+         FROM news
+         WHERE show_in_featured = FALSE`
       ),
     ]);
 
@@ -134,10 +144,14 @@ async function getHomepageProjectNews(locale: Locale): Promise<{
       ...resolveNewsHref(locale, item.link_type, item.link_value),
     }));
 
-    return { featured, list };
+    return {
+      featured,
+      list,
+      listTotalCount: Number(listCountRows[0]?.count ?? 0),
+    };
   } catch (error) {
     console.error("Error fetching homepage project news:", error);
-    return { featured: [], list: [] };
+    return { featured: [], list: [], listTotalCount: 0 };
   }
 }
 
@@ -181,7 +195,13 @@ export default async function LocaleHome({ params }: PageProps) {
             {t.sections.projectNews.title}
           </h2>
         </div>
-        <ProjectNews locale={locale} featured={projectNews.featured} list={projectNews.list} />
+        <ProjectNews
+          locale={locale}
+          featured={projectNews.featured}
+          list={projectNews.list}
+          totalListItems={projectNews.listTotalCount}
+          pageSize={HOMEPAGE_NEWS_PAGE_SIZE}
+        />
       </section>
 
       <script

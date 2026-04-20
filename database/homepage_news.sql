@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS news (
   title_ja VARCHAR(255) NOT NULL,
   link_type VARCHAR(20) NOT NULL DEFAULT 'none',
   link_value VARCHAR(500) NULL,
-  news_date DATE NULL,
+  news_date DATE NOT NULL,
   image VARCHAR(500) NULL,
   show_in_featured BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

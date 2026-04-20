@@ -14,6 +14,11 @@ type InternalOptionRow = RowDataPacket & {
   title_zh: string;
 };
 
+function parsePositiveInt(value: string | null, fallback: number) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : fallback;
+}
+
 type CreateNewsPayload = {
   title_en?: string;
   title_zh?: string;
@@ -41,6 +46,10 @@ async function getFeaturedCount() {
 function validatePayload(body: CreateNewsPayload) {
   if (!body.title_zh?.trim() || !body.title_en?.trim() || !body.title_ja?.trim()) {
     return "Missing required title fields";
+  }
+
+  if (!body.news_date?.trim()) {
+    return "News date is required";
   }
 
   if (body.show_in_featured && !body.image?.trim()) {
@@ -76,43 +85,70 @@ function validatePayload(body: CreateNewsPayload) {
   return null;
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const admin = await getCurrentAdmin();
     if (!admin) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const [newsItems, invitations, newsColumns] = await Promise.all([
-      query(
-        `SELECT id, title_en, title_zh, title_ja, link_type, link_value, news_date, image, show_in_featured,
-                created_at, updated_at
-         FROM news
-         ORDER BY show_in_featured DESC, news_date DESC, id DESC`
-      ),
-      query<InternalOptionRow>(
-        `SELECT id, title_zh
-         FROM invitation
-         ORDER BY event_time DESC, id DESC`
-      ),
-      query<InternalOptionRow>(
-        `SELECT id, title_zh
-         FROM news_column
-         ORDER BY series_number DESC, id DESC`
-      ),
-    ]);
+    const searchParams = request.nextUrl.searchParams;
+    const page = parsePositiveInt(searchParams.get("page"), 1);
+    const pageSize = Math.min(100, parsePositiveInt(searchParams.get("pageSize"), 10));
 
-    return NextResponse.json({
-      newsItems,
-      internalOptions: {
-        invitations,
-        newsColumns,
-      },
-    });
+    return getPaginatedNewsResponse(page, pageSize);
   } catch (error) {
     console.error("Error fetching homepage news:", error);
     return NextResponse.json({ error: "Failed to fetch homepage news" }, { status: 500 });
   }
+}
+
+async function getPaginatedNewsResponse(page: number, pageSize: number) {
+  const safePage = Math.max(1, page);
+  const safePageSize = Math.max(1, Math.min(100, pageSize));
+  const offset = (safePage - 1) * safePageSize;
+
+  const [newsItems, invitations, newsColumns, totalRows, featuredRows] = await Promise.all([
+    query(
+      `SELECT id, title_en, title_zh, title_ja, link_type, link_value, news_date, image, show_in_featured,
+              created_at, updated_at
+       FROM news
+       ORDER BY show_in_featured DESC, news_date DESC, id DESC
+       LIMIT ? OFFSET ?`,
+      [safePageSize, offset]
+    ),
+    query<InternalOptionRow>(
+      `SELECT id, title_zh
+       FROM invitation
+       ORDER BY event_time DESC, id DESC`
+    ),
+    query<InternalOptionRow>(
+      `SELECT id, title_zh
+       FROM news_column
+       ORDER BY series_number DESC, id DESC`
+    ),
+    query<CountRow>("SELECT COUNT(*) AS count FROM news"),
+    query<CountRow>("SELECT COUNT(*) AS count FROM news WHERE show_in_featured = TRUE"),
+  ]);
+
+  const totalItems = Number(totalRows[0]?.count ?? 0);
+  const totalPages = Math.max(1, Math.ceil(totalItems / safePageSize));
+  const featuredCount = Number(featuredRows[0]?.count ?? 0);
+
+  return NextResponse.json({
+    newsItems,
+    featuredCount,
+    pagination: {
+      page: safePage,
+      pageSize: safePageSize,
+      totalItems,
+      totalPages,
+    },
+    internalOptions: {
+      invitations,
+      newsColumns,
+    },
+  });
 }
 
 export async function POST(request: NextRequest) {
@@ -147,7 +183,7 @@ export async function POST(request: NextRequest) {
         body.title_ja?.trim(),
         body.link_type,
         body.link_value?.trim() || null,
-        body.news_date || null,
+        body.news_date.trim(),
         body.image?.trim() || null,
         Boolean(body.show_in_featured),
       ]

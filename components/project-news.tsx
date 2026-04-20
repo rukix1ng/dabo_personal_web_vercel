@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -25,16 +25,92 @@ type ProjectNewsProps = {
   locale: string;
   featured: readonly FeaturedNews[];
   list: readonly NewsItem[];
+  totalListItems: number;
+  pageSize: number;
 };
 
-export function ProjectNews({ locale, featured, list }: ProjectNewsProps) {
+type NewsListApiResponse = {
+  items?: NewsItem[];
+  pagination?: {
+    page: number;
+    pageSize: number;
+    totalItems: number;
+    totalPages: number;
+    hasMore: boolean;
+  };
+};
+
+export function ProjectNews({
+  locale,
+  featured,
+  list,
+  totalListItems,
+  pageSize,
+}: ProjectNewsProps) {
   const [selectedNewsId, setSelectedNewsId] = useState<string | null>(featured[0]?.id ?? null);
+  const [listItems, setListItems] = useState<NewsItem[]>([...list]);
+  const [currentPage, setCurrentPage] = useState(() => Math.max(1, Math.ceil(list.length / pageSize)));
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(list.length < totalListItems);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const selectedNews =
     featured.find((item) => item.id === selectedNewsId) ?? featured[0] ?? null;
   const viewMoreLabel =
     locale === "zh" ? "查看更多 →" : locale === "ja" ? "もっと見る →" : "View More →";
 
-  if (featured.length === 0 && list.length === 0) {
+  useEffect(() => {
+    setListItems([...list]);
+    setCurrentPage(Math.max(1, Math.ceil(list.length / pageSize)));
+    setHasMore(list.length < totalListItems);
+  }, [list, pageSize, totalListItems]);
+
+  const loadMore = useCallback(async () => {
+    if (isLoadingMore || !hasMore) return;
+
+    setIsLoadingMore(true);
+    try {
+      const nextPage = currentPage + 1;
+      const response = await fetch(
+        `/api/news?locale=${encodeURIComponent(locale)}&page=${nextPage}&pageSize=${pageSize}`
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to load more news");
+      }
+
+      const data = (await response.json()) as NewsListApiResponse;
+      const nextItems = data.items || [];
+
+      setListItems((prev) => [...prev, ...nextItems]);
+      setCurrentPage(data.pagination?.page ?? nextPage);
+      setHasMore(Boolean(data.pagination?.hasMore));
+    } catch (error) {
+      console.error("Failed to load more homepage news:", error);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [currentPage, hasMore, isLoadingMore, locale, pageSize]);
+
+  useEffect(() => {
+    if (!hasMore) return;
+
+    const target = loadMoreRef.current;
+    if (!target) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          void loadMore();
+        }
+      },
+      { rootMargin: "160px 0px" }
+    );
+
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [hasMore, loadMore]);
+
+  if (featured.length === 0 && listItems.length === 0) {
     return (
       <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
         暂无项目新闻
@@ -108,7 +184,7 @@ export function ProjectNews({ locale, featured, list }: ProjectNewsProps) {
       ) : null}
 
       <div className="flex flex-col gap-3 pt-4">
-        {list.map((item) =>
+        {listItems.map((item) =>
           item.href ? (
             item.external ? (
               <a
@@ -154,6 +230,31 @@ export function ProjectNews({ locale, featured, list }: ProjectNewsProps) {
             </div>
           )
         )}
+
+        {hasMore ? (
+          <div className="pt-3">
+            <button
+              type="button"
+              onClick={() => void loadMore()}
+              disabled={isLoadingMore}
+              className="w-full cursor-pointer rounded-lg border border-border bg-card px-4 py-3 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isLoadingMore
+                ? locale === "zh"
+                  ? "加载中..."
+                  : locale === "ja"
+                    ? "読み込み中..."
+                    : "Loading..."
+                : locale === "zh"
+                  ? "加载更多"
+                  : locale === "ja"
+                    ? "もっと見る"
+                    : "Load More"}
+            </button>
+          </div>
+        ) : null}
+
+        {hasMore ? <div ref={loadMoreRef} className="h-1 w-full" aria-hidden="true" /> : null}
       </div>
     </div>
   );

@@ -39,6 +39,10 @@ function validatePayload(body: NewsPayload) {
     return "Missing required title fields";
   }
 
+  if (!body.news_date?.trim()) {
+    return "News date is required";
+  }
+
   if (body.show_in_featured && !body.image?.trim()) {
     return "Featured news must include an image";
   }
@@ -134,7 +138,7 @@ export async function PUT(
         body.title_ja?.trim(),
         body.link_type,
         body.link_value?.trim() || null,
-        body.news_date || null,
+        body.news_date.trim(),
         body.image?.trim() || null,
         Boolean(body.show_in_featured),
         newsId,

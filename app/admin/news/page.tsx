@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ChevronDown, ChevronRight, Edit, Plus, Save, Search, Trash2, X } from "lucide-react";
 import { ImageUpload } from "@/components/image-upload";
 import { buildInternalLinkValue, parseInternalLinkValue, type NewsLinkType } from "@/lib/news-links";
+import { Pagination } from "@/components/pagination";
 
 interface NewsItem {
   id: number;
@@ -23,6 +24,13 @@ interface NewsItem {
 interface InternalOption {
   id: number;
   title_zh: string;
+}
+
+interface NewsPagination {
+  page: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
 }
 
 interface NewsFormData {
@@ -53,15 +61,25 @@ const initialFormData: NewsFormData = {
   show_in_featured: false,
 };
 
+const PAGE_SIZE = 10;
+
 export default function HomepageNewsManagementPage() {
   const router = useRouter();
   const topRef = useRef<HTMLDivElement>(null);
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
   const [invitations, setInvitations] = useState<InternalOption[]>([]);
   const [newsColumns, setNewsColumns] = useState<InternalOption[]>([]);
+  const [featuredCount, setFeaturedCount] = useState(0);
+  const [pagination, setPagination] = useState<NewsPagination>({
+    page: 1,
+    pageSize: PAGE_SIZE,
+    totalItems: 0,
+    totalPages: 1,
+  });
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingWasFeatured, setEditingWasFeatured] = useState(false);
   const [error, setError] = useState("");
   const [toast, setToast] = useState<ToastState>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -72,10 +90,7 @@ export default function HomepageNewsManagementPage() {
   const [treeOpen, setTreeOpen] = useState<"invitation" | "news_column" | null>("invitation");
   const [formData, setFormData] = useState<NewsFormData>(initialFormData);
 
-  const featuredCount = newsItems.filter((item) => item.show_in_featured).length;
-  const featuredCountExcludingEditing = newsItems.filter(
-    (item) => item.show_in_featured && item.id !== editingId
-  ).length;
+  const featuredCountExcludingEditing = Math.max(0, featuredCount - (editingWasFeatured ? 1 : 0));
 
   const selectedInternalOptionLabel = useMemo(() => {
     const parsed = parseInternalLinkValue(formData.link_value);
@@ -100,9 +115,9 @@ export default function HomepageNewsManagementPage() {
     return newsColumns.filter((item) => item.title_zh.toLowerCase().includes(normalizedInternalLinkSearch));
   }, [newsColumns, normalizedInternalLinkSearch]);
 
-  const fetchNewsItems = useCallback(async () => {
+  const fetchNewsItems = useCallback(async (page = 1) => {
     try {
-      const res = await fetch("/api/admin/news");
+      const res = await fetch(`/api/admin/news?page=${page}&pageSize=${PAGE_SIZE}`);
       if (!res.ok) {
         if (res.status === 401) {
           router.push("/admin/login");
@@ -117,6 +132,15 @@ export default function HomepageNewsManagementPage() {
       setNewsItems(data.newsItems || []);
       setInvitations(data.internalOptions?.invitations || []);
       setNewsColumns(data.internalOptions?.newsColumns || []);
+      setFeaturedCount(Number(data.featuredCount || 0));
+      setPagination(
+        data.pagination || {
+          page,
+          pageSize: PAGE_SIZE,
+          totalItems: 0,
+          totalPages: 1,
+        }
+      );
       setError("");
     } catch (fetchError) {
       console.error("获取首页新闻出错:", fetchError);
@@ -139,6 +163,7 @@ export default function HomepageNewsManagementPage() {
   const resetForm = () => {
     setFormData(initialFormData);
     setEditingId(null);
+    setEditingWasFeatured(false);
     setShowForm(false);
     setActiveTab("zh");
     setTreeOpen("invitation");
@@ -157,6 +182,7 @@ export default function HomepageNewsManagementPage() {
   const handleEdit = (newsItem: NewsItem) => {
     const parsed = parseInternalLinkValue(newsItem.link_value);
     setEditingId(newsItem.id);
+    setEditingWasFeatured(newsItem.show_in_featured);
     setFormData({
       title_en: newsItem.title_en,
       title_zh: newsItem.title_zh,
@@ -195,6 +221,7 @@ export default function HomepageNewsManagementPage() {
     if (!formData.title_zh.trim()) errors.push("请填写中文标题");
     if (!formData.title_en.trim()) errors.push("请填写英文标题");
     if (!formData.title_ja.trim()) errors.push("请填写日文标题");
+    if (!formData.news_date.trim()) errors.push("请填写新闻日期");
     if (formData.link_type === "external" && !formData.link_value.trim()) {
       errors.push("请填写外部链接地址");
     }
@@ -226,7 +253,7 @@ export default function HomepageNewsManagementPage() {
       const payload = {
         ...formData,
         link_value: formData.link_type === "none" ? null : formData.link_value.trim(),
-        news_date: formData.news_date || null,
+        news_date: formData.news_date.trim(),
         image: formData.image.trim() || null,
       };
 
@@ -252,7 +279,7 @@ export default function HomepageNewsManagementPage() {
         return;
       }
 
-      await fetchNewsItems();
+      await fetchNewsItems(pagination.page);
       showToast({
         type: "success",
         lines: [editingId ? "首页新闻已更新" : "首页新闻已创建"],
@@ -292,7 +319,10 @@ export default function HomepageNewsManagementPage() {
         return;
       }
 
-      await fetchNewsItems();
+      const nextTotalItems = Math.max(0, pagination.totalItems - 1);
+      const nextTotalPages = Math.max(1, Math.ceil(nextTotalItems / pagination.pageSize));
+      const targetPage = Math.min(pagination.page, nextTotalPages);
+      await fetchNewsItems(targetPage);
       showToast({
         type: "success",
         lines: ["首页新闻已删除"],
@@ -614,12 +644,13 @@ export default function HomepageNewsManagementPage() {
 
                 <div>
                   <label className="mb-2 block text-sm font-medium text-foreground">
-                    新闻日期
+                    新闻日期*
                   </label>
                   <input
                     type="date"
                     value={formData.news_date}
                     onChange={(e) => setFormData({ ...formData, news_date: e.target.value })}
+                    required
                     className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
@@ -772,6 +803,22 @@ export default function HomepageNewsManagementPage() {
             </tbody>
           </table>
         </div>
+
+        {pagination.totalItems > 0 ? (
+          <div className="border-t border-border px-6 py-4">
+            <Pagination
+              currentPage={pagination.page}
+              totalPages={pagination.totalPages}
+              totalItems={pagination.totalItems}
+              itemsPerPage={pagination.pageSize}
+              onPageChange={(page) => {
+                if (page === pagination.page) return;
+                setLoading(true);
+                void fetchNewsItems(page);
+              }}
+            />
+          </div>
+        ) : null}
       </div>
     </div>
   );
