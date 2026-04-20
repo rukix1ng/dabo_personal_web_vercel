@@ -184,6 +184,24 @@ export default function HomepageNewsManagementPage() {
     setToast(nextToast);
   };
 
+  const refreshInternalOptions = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/admin/news?page=1&pageSize=1`);
+      if (!res.ok) {
+        if (res.status === 401) {
+          router.push("/admin/login");
+        }
+        return;
+      }
+
+      const data = await res.json();
+      setInvitations(data.internalOptions?.invitations || []);
+      setNewsColumns(data.internalOptions?.newsColumns || []);
+    } catch (fetchError) {
+      console.error("刷新内部链接选项出错:", fetchError);
+    }
+  }, [router]);
+
   const handleEdit = (newsItem: NewsItem) => {
     const parsed = parseInternalLinkValue(newsItem.link_value);
     const currentImage = newsItem.image || "";
@@ -205,6 +223,7 @@ export default function HomepageNewsManagementPage() {
     setShowForm(true);
     setInternalLinkSearch("");
     setInternalLinkMenuOpen(false);
+    void refreshInternalOptions();
   };
 
   const setLinkType = (nextType: NewsLinkType) => {
@@ -218,6 +237,7 @@ export default function HomepageNewsManagementPage() {
       setInternalLinkSearch("");
     } else {
       setTreeOpen("invitation");
+      void refreshInternalOptions();
     }
   };
 
@@ -378,7 +398,10 @@ export default function HomepageNewsManagementPage() {
           </p>
         </div>
         <button
-          onClick={() => setShowForm(true)}
+          onClick={() => {
+            setShowForm(true);
+            void refreshInternalOptions();
+          }}
           className="flex cursor-pointer items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
         >
           <Plus className="h-4 w-4" />
