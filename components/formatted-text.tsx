@@ -77,7 +77,7 @@ export function FormattedText({ text, className = '' }: FormattedTextProps) {
                 return (
                     <p
                         key={`para-${pIndex}`}
-                        className={pIndex < paragraphs.length - 1 ? 'mb-4' : ''}
+                        className={pIndex < paragraphs.length - 1 ? 'mb-4 text-justify' : 'text-justify'}
                     >
                         {processedParts}
                     </p>
