@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronDown, ChevronRight, Edit, Plus, Save, Search, Trash2, X } from "lucide-react";
+import { StatusAlert } from "@/components/admin/status-alert";
 import { ImageUpload } from "@/components/image-upload";
 import { buildInternalLinkValue, parseInternalLinkValue, type NewsLinkType } from "@/lib/news-links";
 import { Pagination } from "@/components/pagination";
@@ -89,6 +90,8 @@ export default function HomepageNewsManagementPage() {
   const [internalLinkSearch, setInternalLinkSearch] = useState("");
   const [treeOpen, setTreeOpen] = useState<"invitation" | "news_column" | null>("invitation");
   const [formData, setFormData] = useState<NewsFormData>(initialFormData);
+  const [imageCnUrl, setImageCnUrl] = useState("");
+  const [imageSupabaseUrl, setImageSupabaseUrl] = useState("");
 
   const featuredCountExcludingEditing = Math.max(0, featuredCount - (editingWasFeatured ? 1 : 0));
 
@@ -162,6 +165,8 @@ export default function HomepageNewsManagementPage() {
 
   const resetForm = () => {
     setFormData(initialFormData);
+    setImageCnUrl("");
+    setImageSupabaseUrl("");
     setEditingId(null);
     setEditingWasFeatured(false);
     setShowForm(false);
@@ -181,6 +186,7 @@ export default function HomepageNewsManagementPage() {
 
   const handleEdit = (newsItem: NewsItem) => {
     const parsed = parseInternalLinkValue(newsItem.link_value);
+    const currentImage = newsItem.image || "";
     setEditingId(newsItem.id);
     setEditingWasFeatured(newsItem.show_in_featured);
     setFormData({
@@ -190,9 +196,11 @@ export default function HomepageNewsManagementPage() {
       link_type: newsItem.link_type || "none",
       link_value: newsItem.link_value || "",
       news_date: newsItem.news_date || "",
-      image: newsItem.image || "",
+      image: currentImage,
       show_in_featured: newsItem.show_in_featured,
     });
+    setImageCnUrl(currentImage.includes("clouddn.com") || currentImage.includes("qiniucs.com") ? currentImage : "");
+    setImageSupabaseUrl(currentImage.includes(".supabase.co/") ? currentImage : "");
     setTreeOpen(parsed?.kind || "invitation");
     setShowForm(true);
     setInternalLinkSearch("");
@@ -353,22 +361,12 @@ export default function HomepageNewsManagementPage() {
 
       <div className="pointer-events-none fixed left-1/2 top-4 z-[120] flex w-full max-w-3xl -translate-x-1/2 flex-col gap-3 px-4">
         {toast && (
-          <div
-            className={`pointer-events-auto rounded-lg border px-4 py-3 shadow-lg backdrop-blur-sm ${
-              toast.type === "success"
-                ? "border-green-500/30 bg-green-500/10 text-green-600 dark:text-green-400"
-                : toast.type === "warning"
-                  ? "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                  : "border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400"
-            }`}
-          >
-            {toast.title && <div className="text-sm font-medium">{toast.title}</div>}
-            <ul className={`${toast.title ? "mt-2" : ""} space-y-1 text-sm`}>
-              {toast.lines.map((item, index) => (
-                <li key={`${item}-${index}`}>{toast.title ? `- ${item}` : item}</li>
-              ))}
-            </ul>
-          </div>
+          <StatusAlert
+            variant={toast.type === "error" ? "error" : toast.type}
+            title={toast.title}
+            lines={toast.lines}
+            className="pointer-events-auto border-white/10 shadow-lg backdrop-blur-sm"
+          />
         )}
       </div>
 
@@ -393,9 +391,7 @@ export default function HomepageNewsManagementPage() {
       </div>
 
       {error && (
-        <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-600 dark:text-red-400">
-          {error}
-        </div>
+        <StatusAlert variant="error" lines={[error]} />
       )}
 
       {showForm && (
@@ -658,8 +654,19 @@ export default function HomepageNewsManagementPage() {
                 <ImageUpload
                   value={formData.image}
                   onChange={(url) => setFormData({ ...formData, image: url })}
+                  onUploaded={({ url, url_en }) => {
+                    const preferredUrl = url_en || url;
+                    setFormData((prev) => ({ ...prev, image: preferredUrl }));
+                    setImageCnUrl(url || "");
+                    setImageSupabaseUrl(url_en || "");
+                  }}
+                  extraUrls={[
+                    { label: "国内七牛云", value: imageCnUrl },
+                    { label: "国外 Supabase", value: imageSupabaseUrl },
+                  ]}
                   folder="homepage-news"
                   label="新闻图片"
+                  preferSupabaseUrl
                 />
 
                 <label className="flex items-start gap-3 rounded-lg border border-border bg-background px-4 py-3">

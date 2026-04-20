@@ -12,6 +12,7 @@ interface ImageUploadProps {
     folder?: string;
     label?: string;
     required?: boolean;
+    preferSupabaseUrl?: boolean;
 }
 
 export function ImageUpload({
@@ -22,6 +23,7 @@ export function ImageUpload({
     folder = "uploads",
     label = "图片",
     required = false,
+    preferSupabaseUrl = false,
 }: ImageUploadProps) {
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState("");
@@ -75,7 +77,12 @@ export function ImageUpload({
             }
 
             const data = await res.json();
-            onChange(data.url);
+            const preferredUrl =
+                preferSupabaseUrl && typeof data.url_en === "string" && data.url_en
+                    ? data.url_en
+                    : data.url;
+
+            onChange(preferredUrl);
             onUploaded?.(data);
             setWarning(Array.isArray(data.warnings) ? data.warnings.join("；") : "");
         } catch (err) {

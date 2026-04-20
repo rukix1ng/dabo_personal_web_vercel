@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Lock, User } from "lucide-react";
+import { StatusAlert } from "@/components/admin/status-alert";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -105,9 +106,7 @@ export default function LoginPage() {
 
                         {/* Error Message */}
                         {error && (
-                            <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-600 dark:text-red-400">
-                                {error}
-                            </div>
+                            <StatusAlert variant="error" lines={[error]} />
                         )}
 
                         {/* Submit Button */}

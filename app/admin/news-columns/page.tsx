@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Edit, Trash2, X, Save, Sparkles } from "lucide-react";
+import { StatusAlert } from "@/components/admin/status-alert";
 import { ImageUpload } from "@/components/image-upload";
 import { formatMonthInputValue, formatYearMonth } from "@/lib/date-time";
 
@@ -399,16 +400,12 @@ export default function NewsColumnsManagementPage() {
 
             {/* Error Message */}
             {error && (
-                <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-600 dark:text-red-400">
-                    {error}
-                </div>
+                <StatusAlert variant="error" lines={[error]} />
             )}
 
             {/* Success Message */}
             {successMessage && (
-                <div className="rounded-lg bg-green-500/10 border border-green-500/20 px-4 py-3 text-sm text-green-600 dark:text-green-400">
-                    {successMessage}
-                </div>
+                <StatusAlert variant="success" lines={[successMessage]} />
             )}
 
             {/* Form Modal */}
@@ -429,21 +426,12 @@ export default function NewsColumnsManagementPage() {
 
                         {/* Validation Errors */}
                         {validationErrors.length > 0 && (
-                            <div className="mb-6 rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3">
-                                <div className="flex items-start gap-2">
-                                    <div className="text-red-600 dark:text-red-400 font-medium text-sm">
-                                        请完善以下必填项：
-                                    </div>
-                                </div>
-                                <ul className="mt-2 space-y-1 text-sm text-red-600 dark:text-red-400">
-                                    {validationErrors.map((error, index) => (
-                                        <li key={index} className="flex items-center gap-2">
-                                            <span className="text-red-500">•</span>
-                                            {error}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
+                            <StatusAlert
+                                variant="error"
+                                title="请完善以下必填项："
+                                lines={validationErrors}
+                                className="mb-6"
+                            />
                         )}
 
                         {/* Language Tabs */}
@@ -483,15 +471,11 @@ export default function NewsColumnsManagementPage() {
                         <form onSubmit={handleSubmit} className="space-y-6">
                             {/* Translation Messages */}
                             {translateSuccess && (
-                                <div className="rounded-lg bg-green-500/10 border border-green-500/20 px-4 py-3 text-sm text-green-600 dark:text-green-400">
-                                    {translateSuccess}
-                                </div>
+                                <StatusAlert variant="success" lines={[translateSuccess]} />
                             )}
 
                             {translateError && (
-                                <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-600 dark:text-red-400">
-                                    {translateError}
-                                </div>
+                                <StatusAlert variant="error" lines={[translateError]} />
                             )}
 
                             {/* Chinese Fields */}
