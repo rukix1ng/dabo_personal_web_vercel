@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FileText, Presentation, Newspaper, Home } from "lucide-react";
+import { PanelsTopLeft, FileText, Presentation, Newspaper, Home } from "lucide-react";
 
 interface AdminNavProps {
     username: string;
@@ -37,6 +37,20 @@ export function AdminNav({ username }: AdminNavProps) {
                         )}
                         <Presentation className="h-5 w-5" />
                         邀请报告管理
+                    </Link>
+                    <Link
+                        href="/admin/news"
+                        className={`relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors cursor-pointer ${
+                            pathname === "/admin/news" || pathname.startsWith("/admin/news/")
+                                ? "bg-primary/10 text-primary"
+                                : "text-foreground hover:bg-primary/10 hover:text-primary"
+                        }`}
+                    >
+                        {(pathname === "/admin/news" || pathname.startsWith("/admin/news/")) && (
+                            <span className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-primary" />
+                        )}
+                        <PanelsTopLeft className="h-5 w-5" />
+                        {"\u9996\u9875\u65b0\u95fb\u7ba1\u7406"}
                     </Link>
                     <Link
                         href="/admin/news-columns"

@@ -9,6 +9,23 @@ type UploadOutcome = {
     error?: string;
 };
 
+function getStorageConfigHint() {
+    return {
+        qiniu: [
+            'QINIU_ACCESS_KEY',
+            'QINIU_SECRET_KEY',
+            'QINIU_BUCKET',
+            'QINIU_DOMAIN',
+        ],
+        supabase: [
+            'SUPABASE_S3_ENDPOINT',
+            'SUPABASE_S3_BUCKET',
+            'SUPABASE_S3_ACCESS_KEY',
+            'SUPABASE_S3_SECRET_KEY',
+        ],
+    };
+}
+
 // POST /api/upload/image - Upload image to Qiniu
 export async function POST(request: NextRequest) {
     try {
@@ -73,7 +90,10 @@ export async function POST(request: NextRequest) {
         if (!qiniuConfigured && !supabaseConfigured) {
             console.error('No storage provider configured');
             return NextResponse.json(
-                { error: 'Storage service not configured' },
+                {
+                    error: '未配置图片存储服务。请在 .env.local 中配置七牛或 Supabase S3 环境变量。',
+                    configHint: getStorageConfigHint(),
+                },
                 { status: 500 }
             );
         }

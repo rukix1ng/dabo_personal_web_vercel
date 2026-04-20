@@ -52,7 +52,6 @@ export async function PUT(
         const body = await request.json();
         const {
             title_en, title_zh, title_ja,
-            display_title_en, display_title_zh, display_title_ja,
             content_en, content_zh, content_ja,
             journal_name_en, journal_name_zh, journal_name_ja,
             author_bio_en, author_bio_zh, author_bio_ja,
@@ -62,7 +61,6 @@ export async function PUT(
         await query(
             `UPDATE news_column SET
                 title_en = ?, title_zh = ?, title_ja = ?,
-                display_title_en = ?, display_title_zh = ?, display_title_ja = ?,
                 content_en = ?, content_zh = ?, content_ja = ?,
                 journal_name_en = ?, journal_name_zh = ?, journal_name_ja = ?,
                 author_bio_en = ?, author_bio_zh = ?, author_bio_ja = ?,
@@ -70,7 +68,6 @@ export async function PUT(
             WHERE id = ?`,
             [
                 title_en, title_zh, title_ja,
-                display_title_en || null, display_title_zh || null, display_title_ja || null,
                 content_en || null, content_zh || null, content_ja || null,
                 journal_name_en, journal_name_zh, journal_name_ja,
                 author_bio_en || null, author_bio_zh || null, author_bio_ja || null,

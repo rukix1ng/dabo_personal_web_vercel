@@ -14,7 +14,6 @@ export async function GET() {
 
     const papers = await query(
       `SELECT id, title_en, title_zh, title_ja,
-              display_title_en, display_title_zh, display_title_ja,
               author, journal_name, image, image_en,
               description_en, description_zh, description_ja,
               paper_link, sponsor_en, sponsor_zh, sponsor_ja,
@@ -46,9 +45,6 @@ export async function POST(request: NextRequest) {
       title_en,
       title_zh,
       title_ja,
-      display_title_en,
-      display_title_zh,
-      display_title_ja,
       author,
       journal_name,
       image,
@@ -74,7 +70,6 @@ export async function POST(request: NextRequest) {
     const result = await query<ResultSetHeader>(
       `INSERT INTO papers (
         title_en, title_zh, title_ja,
-        display_title_en, display_title_zh, display_title_ja,
         author, journal_name, image, image_en,
         description_en, description_zh, description_ja,
         paper_link, sponsor_en, sponsor_zh, sponsor_ja, sponsor_link
@@ -82,10 +77,7 @@ export async function POST(request: NextRequest) {
       [
         title_en,
         title_zh,
-        title_ja,
-        display_title_en || null,
-        display_title_zh || null,
-        display_title_ja || null,
+        title_ja,
         author || null,
         journal_name || null,
         image || null,

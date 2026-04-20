@@ -10,9 +10,6 @@ interface Paper {
     title_en: string;
     title_zh: string;
     title_ja: string;
-    display_title_en: string | null;
-    display_title_zh: string | null;
-    display_title_ja: string | null;
     author: string | null;
     journal_name: string | null;
     image: string | null;
@@ -33,9 +30,6 @@ interface PaperFormData {
     title_en: string;
     title_zh: string;
     title_ja: string;
-    display_title_en: string;
-    display_title_zh: string;
-    display_title_ja: string;
     author: string;
     journal_name: string;
     image: string;
@@ -71,9 +65,6 @@ export default function PapersManagementPage() {
         title_en: "",
         title_zh: "",
         title_ja: "",
-        display_title_en: "",
-        display_title_zh: "",
-        display_title_ja: "",
         author: "",
         journal_name: "",
         image: "",
@@ -214,9 +205,6 @@ export default function PapersManagementPage() {
             title_en: paper.title_en,
             title_zh: paper.title_zh,
             title_ja: paper.title_ja,
-            display_title_en: paper.display_title_en || "",
-            display_title_zh: paper.display_title_zh || "",
-            display_title_ja: paper.display_title_ja || "",
             author: paper.author || "",
             journal_name: paper.journal_name || "",
             image: paper.image || "",
@@ -239,9 +227,6 @@ export default function PapersManagementPage() {
             title_en: "",
             title_zh: "",
             title_ja: "",
-            display_title_en: "",
-            display_title_zh: "",
-            display_title_ja: "",
             author: "",
             journal_name: "",
             image: "",
@@ -489,32 +474,6 @@ export default function PapersManagementPage() {
                                         />
                                     </div>
 
-                                    <div>
-                                        <div className="flex items-center justify-between mb-2">
-                                            <label className="block text-sm font-medium text-foreground">
-                                                首页展示标题（中文）
-                                            </label>
-                                            <button
-                                                type="button"
-                                                onClick={() => setFormData({ ...formData, display_title_zh: formData.title_zh })}
-                                                className="text-xs text-primary hover:underline cursor-pointer"
-                                            >
-                                                使用原标题
-                                            </button>
-                                        </div>
-                                        <input
-                                            type="text"
-                                            value={formData.display_title_zh}
-                                            onChange={(e) =>
-                                                setFormData({ ...formData, display_title_zh: e.target.value })
-                                            }
-                                            placeholder="留空则使用原标题"
-                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                        />
-                                        <p className="mt-1 text-xs text-muted-foreground">
-                                            用于首页显示的标题，如果为空则显示原标题
-                                        </p>
-                                    </div>
 
                                     <div>
                                         <label className="mb-2 block text-sm font-medium text-foreground">
@@ -569,32 +528,6 @@ export default function PapersManagementPage() {
                                         />
                                     </div>
 
-                                    <div>
-                                        <div className="flex items-center justify-between mb-2">
-                                            <label className="block text-sm font-medium text-foreground">
-                                                首页展示标题（英文）
-                                            </label>
-                                            <button
-                                                type="button"
-                                                onClick={() => setFormData({ ...formData, display_title_en: formData.title_en })}
-                                                className="text-xs text-primary hover:underline cursor-pointer"
-                                            >
-                                                使用原标题
-                                            </button>
-                                        </div>
-                                        <input
-                                            type="text"
-                                            value={formData.display_title_en}
-                                            onChange={(e) =>
-                                                setFormData({ ...formData, display_title_en: e.target.value })
-                                            }
-                                            placeholder="留空则使用原标题"
-                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                        />
-                                        <p className="mt-1 text-xs text-muted-foreground">
-                                            用于首页显示的标题，如果为空则显示原标题
-                                        </p>
-                                    </div>
 
                                     <div>
                                         <label className="mb-2 block text-sm font-medium text-foreground">
@@ -649,32 +582,6 @@ export default function PapersManagementPage() {
                                         />
                                     </div>
 
-                                    <div>
-                                        <div className="flex items-center justify-between mb-2">
-                                            <label className="block text-sm font-medium text-foreground">
-                                                首页展示标题（日文）
-                                            </label>
-                                            <button
-                                                type="button"
-                                                onClick={() => setFormData({ ...formData, display_title_ja: formData.title_ja })}
-                                                className="text-xs text-primary hover:underline cursor-pointer"
-                                            >
-                                                使用原标题
-                                            </button>
-                                        </div>
-                                        <input
-                                            type="text"
-                                            value={formData.display_title_ja}
-                                            onChange={(e) =>
-                                                setFormData({ ...formData, display_title_ja: e.target.value })
-                                            }
-                                            placeholder="留空则使用原标题"
-                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                        />
-                                        <p className="mt-1 text-xs text-muted-foreground">
-                                            用于首页显示的标题，如果为空则显示原标题
-                                        </p>
-                                    </div>
 
                                     <div>
                                         <label className="mb-2 block text-sm font-medium text-foreground">
@@ -724,7 +631,7 @@ export default function PapersManagementPage() {
                             )}
 
                             {/* AI Translate Button */}
-                            <div className="flex items-center justify-start py-4">
+                            <div className="hidden">
                                 <button
                                     type="button"
                                     onClick={handleTranslateAll}

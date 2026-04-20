@@ -20,9 +20,6 @@ interface NewsColumn {
     content_ja: string | null;
     journal_name_ja: string | null;
     author_bio_ja: string | null;
-    display_title_en: string | null;
-    display_title_zh: string | null;
-    display_title_ja: string | null;
     publish_date: string;
     series_number: number;
     image: string | null;
@@ -44,9 +41,6 @@ interface NewsColumnFormData {
     content_ja: string;
     journal_name_ja: string;
     author_bio_ja: string;
-    display_title_en: string;
-    display_title_zh: string;
-    display_title_ja: string;
     publish_date: string;
     series_number: string;
     image: string;
@@ -83,9 +77,6 @@ export default function NewsColumnsManagementPage() {
         content_ja: "",
         journal_name_ja: "",
         author_bio_ja: "",
-        display_title_en: "",
-        display_title_zh: "",
-        display_title_ja: "",
         publish_date: "",
         series_number: "",
         image: "",
@@ -248,9 +239,6 @@ export default function NewsColumnsManagementPage() {
             content_ja: newsColumn.content_ja || "",
             journal_name_ja: newsColumn.journal_name_ja || "",
             author_bio_ja: newsColumn.author_bio_ja || "",
-            display_title_en: newsColumn.display_title_en || "",
-            display_title_zh: newsColumn.display_title_zh || "",
-            display_title_ja: newsColumn.display_title_ja || "",
             publish_date: publishDateValue,
             series_number: newsColumn.series_number.toString(),
             image: newsColumn.image || "",
@@ -274,9 +262,6 @@ export default function NewsColumnsManagementPage() {
             content_ja: "",
             journal_name_ja: "",
             author_bio_ja: "",
-            display_title_en: "",
-            display_title_zh: "",
-            display_title_ja: "",
             publish_date: "",
             series_number: "",
             image: "",
@@ -528,32 +513,6 @@ export default function NewsColumnsManagementPage() {
                                         />
                                     </div>
 
-                                    <div>
-                                        <div className="flex items-center justify-between mb-2">
-                                            <label className="block text-sm font-medium text-foreground">
-                                                首页展示标题（中文）
-                                            </label>
-                                            <button
-                                                type="button"
-                                                onClick={() => setFormData({ ...formData, display_title_zh: formData.title_zh })}
-                                                className="text-xs text-primary hover:underline cursor-pointer"
-                                            >
-                                                使用原标题
-                                            </button>
-                                        </div>
-                                        <input
-                                            type="text"
-                                            value={formData.display_title_zh}
-                                            onChange={(e) =>
-                                                setFormData({ ...formData, display_title_zh: e.target.value })
-                                            }
-                                            placeholder="留空则使用原标题"
-                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                        />
-                                        <p className="mt-1 text-xs text-muted-foreground">
-                                            用于首页显示的标题，如果为空则显示原标题
-                                        </p>
-                                    </div>
 
                                     <div>
                                         <label className="mb-2 block text-sm font-medium text-foreground">
@@ -624,32 +583,6 @@ export default function NewsColumnsManagementPage() {
                                         />
                                     </div>
 
-                                    <div>
-                                        <div className="flex items-center justify-between mb-2">
-                                            <label className="block text-sm font-medium text-foreground">
-                                                首页展示标题（英文）
-                                            </label>
-                                            <button
-                                                type="button"
-                                                onClick={() => setFormData({ ...formData, display_title_en: formData.title_en })}
-                                                className="text-xs text-primary hover:underline cursor-pointer"
-                                            >
-                                                使用原标题
-                                            </button>
-                                        </div>
-                                        <input
-                                            type="text"
-                                            value={formData.display_title_en}
-                                            onChange={(e) =>
-                                                setFormData({ ...formData, display_title_en: e.target.value })
-                                            }
-                                            placeholder="留空则使用原标题"
-                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                        />
-                                        <p className="mt-1 text-xs text-muted-foreground">
-                                            用于首页显示的标题，如果为空则显示原标题
-                                        </p>
-                                    </div>
 
                                     <div>
                                         <label className="mb-2 block text-sm font-medium text-foreground">
@@ -720,32 +653,6 @@ export default function NewsColumnsManagementPage() {
                                         />
                                     </div>
 
-                                    <div>
-                                        <div className="flex items-center justify-between mb-2">
-                                            <label className="block text-sm font-medium text-foreground">
-                                                首页展示标题（日文）
-                                            </label>
-                                            <button
-                                                type="button"
-                                                onClick={() => setFormData({ ...formData, display_title_ja: formData.title_ja })}
-                                                className="text-xs text-primary hover:underline cursor-pointer"
-                                            >
-                                                使用原标题
-                                            </button>
-                                        </div>
-                                        <input
-                                            type="text"
-                                            value={formData.display_title_ja}
-                                            onChange={(e) =>
-                                                setFormData({ ...formData, display_title_ja: e.target.value })
-                                            }
-                                            placeholder="留空则使用原标题"
-                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                        />
-                                        <p className="mt-1 text-xs text-muted-foreground">
-                                            用于首页显示的标题，如果为空则显示原标题
-                                        </p>
-                                    </div>
 
                                     <div>
                                         <label className="mb-2 block text-sm font-medium text-foreground">
@@ -798,7 +705,7 @@ export default function NewsColumnsManagementPage() {
                             )}
 
                             {/* AI Translate Button */}
-                            <div className="flex items-center justify-start py-4">
+                            <div className="hidden">
                                 <button
                                     type="button"
                                     onClick={handleTranslateAll}

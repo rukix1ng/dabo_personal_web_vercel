@@ -24,9 +24,6 @@ interface Invitation {
     speaker_institution_ja: string | null;
     speaker_institution_link: string | null;
     abstract_ja: string | null;
-    display_title_en: string | null;
-    display_title_zh: string | null;
-    display_title_ja: string | null;
     event_time: string | null;
     image: string | null;
     image_en: string | null;
@@ -55,9 +52,6 @@ interface InvitationFormData {
     speaker_institution_ja: string;
     speaker_institution_link: string;
     abstract_ja: string;
-    display_title_en: string;
-    display_title_zh: string;
-    display_title_ja: string;
     event_time: string;
     image: string;
     image_en: string;
@@ -101,9 +95,6 @@ export default function InvitationsManagementPage() {
         speaker_institution_ja: "",
         speaker_institution_link: "",
         abstract_ja: "",
-        display_title_en: "",
-        display_title_zh: "",
-        display_title_ja: "",
         event_time: "",
         image: "",
         image_en: "",
@@ -262,9 +253,6 @@ export default function InvitationsManagementPage() {
             speaker_institution_ja: invitation.speaker_institution_ja || "",
             speaker_institution_link: invitation.speaker_institution_link || "",
             abstract_ja: invitation.abstract_ja || "",
-            display_title_en: invitation.display_title_en || "",
-            display_title_zh: invitation.display_title_zh || "",
-            display_title_ja: invitation.display_title_ja || "",
             event_time: formatDateTimeLocalValue(invitation.event_time),
             image: invitation.image || "",
             image_en: invitation.image_en || "",
@@ -295,9 +283,6 @@ export default function InvitationsManagementPage() {
             speaker_institution_ja: "",
             speaker_institution_link: "",
             abstract_ja: "",
-            display_title_en: "",
-            display_title_zh: "",
-            display_title_ja: "",
             event_time: "",
             image: "",
             image_en: "",
@@ -548,32 +533,6 @@ export default function InvitationsManagementPage() {
                                         />
                                     </div>
 
-                                    <div>
-                                        <div className="flex items-center justify-between mb-2">
-                                            <label className="block text-sm font-medium text-foreground">
-                                                首页展示标题（中文）
-                                            </label>
-                                            <button
-                                                type="button"
-                                                onClick={() => setFormData({ ...formData, display_title_zh: formData.title_zh })}
-                                                className="text-xs text-primary hover:underline cursor-pointer"
-                                            >
-                                                使用原标题
-                                            </button>
-                                        </div>
-                                        <input
-                                            type="text"
-                                            value={formData.display_title_zh}
-                                            onChange={(e) =>
-                                                setFormData({ ...formData, display_title_zh: e.target.value })
-                                            }
-                                            placeholder="留空则使用原标题"
-                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                        />
-                                        <p className="mt-1 text-xs text-muted-foreground">
-                                            用于首页显示的标题，如果为空则显示原标题
-                                        </p>
-                                    </div>
 
                                     <div>
                                         <label className="mb-2 block text-sm font-medium text-foreground">
@@ -660,32 +619,6 @@ export default function InvitationsManagementPage() {
                                         />
                                     </div>
 
-                                    <div>
-                                        <div className="flex items-center justify-between mb-2">
-                                            <label className="block text-sm font-medium text-foreground">
-                                                首页展示标题（英文）
-                                            </label>
-                                            <button
-                                                type="button"
-                                                onClick={() => setFormData({ ...formData, display_title_en: formData.title_en })}
-                                                className="text-xs text-primary hover:underline cursor-pointer"
-                                            >
-                                                使用原标题
-                                            </button>
-                                        </div>
-                                        <input
-                                            type="text"
-                                            value={formData.display_title_en}
-                                            onChange={(e) =>
-                                                setFormData({ ...formData, display_title_en: e.target.value })
-                                            }
-                                            placeholder="留空则使用原标题"
-                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                        />
-                                        <p className="mt-1 text-xs text-muted-foreground">
-                                            用于首页显示的标题，如果为空则显示原标题
-                                        </p>
-                                    </div>
 
                                     <div>
                                         <label className="mb-2 block text-sm font-medium text-foreground">
@@ -772,32 +705,6 @@ export default function InvitationsManagementPage() {
                                         />
                                     </div>
 
-                                    <div>
-                                        <div className="flex items-center justify-between mb-2">
-                                            <label className="block text-sm font-medium text-foreground">
-                                                首页展示标题（日文）
-                                            </label>
-                                            <button
-                                                type="button"
-                                                onClick={() => setFormData({ ...formData, display_title_ja: formData.title_ja })}
-                                                className="text-xs text-primary hover:underline cursor-pointer"
-                                            >
-                                                使用原标题
-                                            </button>
-                                        </div>
-                                        <input
-                                            type="text"
-                                            value={formData.display_title_ja}
-                                            onChange={(e) =>
-                                                setFormData({ ...formData, display_title_ja: e.target.value })
-                                            }
-                                            placeholder="留空则使用原标题"
-                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                                        />
-                                        <p className="mt-1 text-xs text-muted-foreground">
-                                            用于首页显示的标题，如果为空则显示原标题
-                                        </p>
-                                    </div>
 
                                     <div>
                                         <label className="mb-2 block text-sm font-medium text-foreground">
@@ -866,7 +773,7 @@ export default function InvitationsManagementPage() {
                             )}
 
                             {/* AI Translate Button */}
-                            <div className="flex items-center justify-start py-4">
+                            <div className="hidden">
                                 <button
                                     type="button"
                                     onClick={handleTranslateAll}

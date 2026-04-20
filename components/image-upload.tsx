@@ -95,6 +95,7 @@ export function ImageUpload({
         onChange("");
         setError("");
         setWarning("");
+        setPreviewSrc("");
     };
 
     const handleClick = () => {
@@ -110,13 +111,19 @@ export function ImageUpload({
             {value ? (
                 <div className="relative group">
                     <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-border bg-muted">
-                        <Image
-                            src={previewSrc}
-                            alt="Uploaded image"
-                            fill
-                            className="object-contain"
-                            onError={handlePreviewError}
-                        />
+                        {previewSrc ? (
+                            <Image
+                                src={previewSrc}
+                                alt="Uploaded image"
+                                fill
+                                className="object-contain"
+                                onError={handlePreviewError}
+                            />
+                        ) : (
+                            <div className="flex h-full w-full items-center justify-center bg-muted">
+                                <span className="text-sm text-muted-foreground">暂无图片</span>
+                            </div>
+                        )}
                     </div>
                     <button
                         type="button"
